@@ -1,0 +1,132 @@
+header {
+  height: 112px;
+  padding-left: clamp(1rem, 10rem, 15vw);
+  padding-right: clamp(1rem, 10rem, 15vw);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(38, 38, 38, 0.2);
+}
+header nav {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: normal;
+}
+
+.nav-links {
+  width: 100%;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  column-gap: 2rem;
+  list-style: none;
+}
+
+li {
+  height: 100%;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+li:hover a {
+  color: white;
+}
+li a {
+  text-decoration: none;
+  color: #F5F5F5;
+  position: relative;
+}
+li:hover .sub-cathegories-wrapper {
+  visibility: visible;
+  opacity: 1;
+}
+
+.sub-cathegories-wrapper {
+  position: absolute;
+  top: 2.5rem;
+  right: 0;
+  z-index: 1;
+  transition: 0.15s;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.sub-cathegories {
+  position: absolute;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  row-gap: 0.5rem;
+  flex-direction: column;
+  width: clamp(140px, 240px, 20vw);
+  padding: 0.5em 1em;
+  background-color: #FAFAFA;
+  border: 1px solid #262626;
+}
+.sub-cathegories::before {
+  position: absolute;
+  right: 1rem;
+  top: -0.5rem;
+  display: block;
+  content: "";
+  height: 40px;
+  width: 20px;
+  border-radius: 4px;
+  transform: rotate(45deg);
+  background-color: #262626;
+  z-index: -1;
+}
+.sub-cathegories .sub-cathegories-listed-items {
+  height: fit-content;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+.sub-cathegories .sub-cathegories-listed-items a {
+  color: #262626;
+  border-bottom: 2px solid #262626;
+  border-radius: 2px;
+  padding: 0.5em 0;
+}
+.sub-cathegories * {
+  color: #262626;
+}
+.sub-cathegories .sub-cathegories-sum {
+  font-weight: 400;
+}
+.sub-cathegories .sub-cathegories-sum b {
+  font-weight: 600;
+}
+.sub-cathegories a {
+  width: 100%;
+}
+.sub-cathegories a button {
+  width: 100%;
+  height: 40px;
+  font-size: 1em;
+  background-color: #262626;
+  color: white;
+  border: 0px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.currency {
+  text-transform: lowercase;
+}
+
+.active {
+  color: white;
+  z-index: 2;
+}/*# sourceMappingURL=Header.css.map */

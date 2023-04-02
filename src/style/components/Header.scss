@@ -1,0 +1,127 @@
+$primary-dark: #262626;
+$primary-color: #FAFAFA;
+$primary-font-color: white;
+$secondary-font-color: #F5F5F5;
+
+@mixin flexit($whereX:center, $whereY:center){
+    display: flex;
+    justify-content: $whereX;
+    align-items: $whereY;
+}
+
+header{
+    height: 112px;
+    padding-left: clamp(1rem, 10rem, 15vw);
+    padding-right: clamp(1rem, 10rem, 15vw);
+    @include flexit(space-between);
+    background-color: rgba($primary-dark, 0.2);
+    // background-color: $primary-dark;
+    nav{
+        height: 100%;
+        width: 100%;
+        @include flexit($whereY: normal);
+    }
+}
+.nav-links{
+    width: 100%;
+    @include flexit(right);
+    column-gap: 2rem;
+    list-style: none;
+}
+li{
+    height: 100%;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 1rem;
+    @include flexit;
+    &:hover a{ color: $primary-font-color; } 
+    a{
+        text-decoration: none;
+        color: $secondary-font-color;
+        position: relative;
+    }
+    &:hover{
+        .sub-cathegories-wrapper{
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+}
+.sub-cathegories-wrapper{
+    position: absolute;
+    top: 2.5rem; //1.5rem was list height i suppose
+    right: 0;
+    z-index: 1;
+    transition: 0.15s;
+    visibility: hidden;
+    opacity: 0;
+}
+.sub-cathegories {
+    // transition: 0.15s;
+    // visibility: hidden;
+    // opacity: 0;
+    position: absolute;
+    right: 0;
+    @include flexit;
+    row-gap: 0.5rem;
+    flex-direction: column;
+    width: clamp(140px, 240px, 20vw);
+    padding: 0.5em 1em;
+    background-color: $primary-color;
+    border: 1px solid $primary-dark;
+    &::before{
+        position: absolute;
+        right: 1rem;
+        top: -0.5rem;
+        display: block;
+        content: "";
+        height: 40px;
+        width: 20px;
+        border-radius: 4px;
+        transform: rotate(45deg);
+        background-color: $primary-dark;
+        z-index: -1;
+    }
+    .sub-cathegories-listed-items {
+        height: fit-content;
+        width: 100%;
+        @include flexit;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+        a {
+            color: $primary-dark;
+            border-bottom: 2px solid $primary-dark;
+            border-radius: 2px;
+            padding: 0.5em 0;
+        }
+    }
+    * { color: $primary-dark; }
+    .sub-cathegories-sum {
+        font-weight: 400;
+        b { font-weight: 600; }
+    }
+    a{
+        width: 100%;
+        button{
+            width: 100%;
+            height: 40px;
+            font-size: 1em;
+            background-color: $primary-dark;
+            color: $primary-font-color;
+            border: 0px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+    }
+}
+.currency{
+    text-transform: lowercase;
+}
+
+
+.active{
+    color: white;
+    z-index: 2;
+}

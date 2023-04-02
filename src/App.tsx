@@ -4,12 +4,12 @@ import {
   createBrowserRouter,
   createRoutesFromElements
 } from "react-router-dom";
-import './App.css';
 import Layout from "./components/Layout";
-// import Checkout from "./style/pages/Checkout";
-import Home from "./style/pages/Home";
-// import ShoppingCart from "./style/pages/ShoppingCart";
-import NotFound from "./style/pages/NotFound";
+import './style/App.css';
+// import Checkout from "./pages/Checkout";
+import Home from "./pages/Home";
+// import ShoppingCart from "./pages/ShoppingCart";
+import NotFound from ".//pages/NotFound";
 //   Link
 
 
