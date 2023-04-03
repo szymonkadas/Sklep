@@ -11,8 +11,7 @@ export default function Header(){
                     }>Strona Główna </NavLink></li>
                     <li><NavLink to="/store" className={({ isActive, isPending }) =>
                         isPending ? "pending" : isActive ? "active" : ""
-                    }>
-                        Sklep 
+                    }> Sklep </NavLink>
                         <div className="sub-cathegories-wrapper">
                             <div className="sub-cathegories">
                                 <ol className="sub-cathegories-listed-items">
@@ -29,7 +28,7 @@ export default function Header(){
                             </div>
                         </div>
 
-                    </NavLink></li>
+                    </li>
                     <li><NavLink to="/account" className={({ isActive, isPending }) =>
                                 isPending ? "pending" : isActive ? "active" : ""
                     }>Konto</NavLink></li>
@@ -41,8 +40,8 @@ export default function Header(){
                     }>Kontakt</NavLink></li>
                     <li><NavLink to="/ShoppingCart" className={({ isActive, isPending }) =>
                             isPending ? "pending" : isActive ? "active" : ""
-                    }>
-                        600,92 <span className="currency">zł</span>
+                        }>  600,92 <span className="currency">zł</span> 
+                        </NavLink>
                             {/* Zrób obramowanie, i before'a tak żeby wyglądało to na ikonkę koszyka */}
                         <div className="sub-cathegories-wrapper">
                             <div className="sub-cathegories">
@@ -56,7 +55,7 @@ export default function Header(){
                             </div>
                             {/* LUB BRAK PRODUKTÓW W KOSZYKU */}
                         </div>
-                    </NavLink></li>
+                    </li>
                 </ol>
             </nav>
         </header>

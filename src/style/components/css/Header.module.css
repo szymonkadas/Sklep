@@ -47,8 +47,8 @@ li:hover .sub-cathegories-wrapper {
 }
 
 .sub-cathegories-wrapper {
-  position: relative;
-  top: 1.5rem;
+  position: absolute;
+  top: 2.5rem;
   right: 0;
   z-index: 1;
   transition: 0.15s;
@@ -129,4 +129,4 @@ li:hover .sub-cathegories-wrapper {
 .active {
   color: white;
   z-index: 2;
-}/*# sourceMappingURL=Header.css.map */
+}/*# sourceMappingURL=Header.module.css.map */

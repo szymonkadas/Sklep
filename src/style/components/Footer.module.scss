@@ -1,0 +1,16 @@
+@use "../variables.scss" as *;
+@use "../mixins.scss" as *;
+@use "../animations.scss" as *;
+
+footer{
+    display: grid;
+    background-color: $primary-dark;
+}
+.nav-links{
+    column-gap: 2rem;
+    @include flexit(center);
+}
+.sub-footer{
+    @include flexit(space-between);
+    padding: 0 2em;
+}

@@ -1,0 +1,5 @@
+@mixin flexit($whereX: center, $whereY: center) {
+    display: flex;
+    justify-content: $whereX;
+    align-items: $whereY;
+}

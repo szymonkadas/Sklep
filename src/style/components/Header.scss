@@ -1,13 +1,6 @@
-$primary-dark: #262626;
-$primary-color: #FAFAFA;
-$primary-font-color: white;
-$secondary-font-color: #F5F5F5;
-
-@mixin flexit($whereX:center, $whereY:center){
-    display: flex;
-    justify-content: $whereX;
-    align-items: $whereY;
-}
+@use "../variables.scss" as *;
+@use "../mixins.scss" as *;
+@use "../animations.scss" as *;
 
 header{
     height: 112px;
@@ -48,8 +41,8 @@ li{
     }
 }
 .sub-cathegories-wrapper{
-    position: absolute;
-    top: 2.5rem; //1.5rem was list height i suppose
+    position: relative;
+    top: 1.5rem; //1.5rem was list height i suppose
     right: 0;
     z-index: 1;
     transition: 0.15s;
