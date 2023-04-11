@@ -7,7 +7,7 @@ import {
 import Layout from "./components/Layout";
 import './style/App.css';
 // import Checkout from "./pages/Checkout";
-import Home from "./pages/Home";
+import Home, { loader } from "./pages/Home";
 // import ShoppingCart from "./pages/ShoppingCart";
 import NotFound from ".//pages/NotFound";
 //   Link
@@ -18,7 +18,7 @@ import NotFound from ".//pages/NotFound";
 function App() {
   const router = createBrowserRouter(createRoutesFromElements(
     <Route path="/" element={<Layout />} >
-      <Route index element={<Home />}></Route>
+      <Route index element={<Home />} loader={loader}></Route>
       {/* <Route path="/store" element={<StoreLayout />}> */}
         {/* <Route index element={<Store />}></Route>
         <Route path="./" element={<StoreAside></StoreAside>}></Route> */}
