@@ -2,31 +2,35 @@
 @use "../mixins.scss" as *;
 @use "../animations.scss" as *;
 
-header{
+.header{
+    @include flexit(space-between);
+    position: sticky;
+    top: 0;
     height: 112px;
+    margin-bottom: -112px;
     padding-left: clamp(1rem, 10rem, 15vw);
     padding-right: clamp(1rem, 10rem, 15vw);
-    @include flexit(space-between);
     background-color: rgba($primary-dark, 0.2);
     // background-color: $primary-dark;
-    nav{
+    .header__logo{}
+    .header__nav{
+        @include flexit($whereY: normal);
         height: 100%;
         width: 100%;
-        @include flexit($whereY: normal);
     }
 }
-.nav-links{
-    width: 100%;
+.nav__nav-links{
     @include flexit(right);
+    width: 100%;
     column-gap: 2rem;
     list-style: none;
 }
-li{
+.nav-links__li{
+    @include flexit;
     height: 100%;
     text-transform: uppercase;
     font-weight: 600;
-    font-size: 1rem;
-    @include flexit;
+    font-size: $default-fs;
     &:hover a{ color: $primary-font-color; } 
     a{
         text-decoration: none;
@@ -34,13 +38,13 @@ li{
         position: relative;
     }
     &:hover{
-        .sub-cathegories-wrapper{
+        .nav-links__li__sub-cathegories-wrapper{
             visibility: visible;
             opacity: 1;
         }
     }
 }
-.sub-cathegories-wrapper{
+.nav-links__li__sub-cathegories-wrapper{
     position: relative;
     top: 1.5rem; //1.5rem was list height i suppose
     right: 0;
@@ -49,15 +53,15 @@ li{
     visibility: hidden;
     opacity: 0;
 }
-.sub-cathegories {
+.nav-links__li__sub-cathegories {
+    @include flexit;
     // transition: 0.15s;
     // visibility: hidden;
     // opacity: 0;
+    flex-direction: column;
     position: absolute;
     right: 0;
-    @include flexit;
     row-gap: 0.5rem;
-    flex-direction: column;
     width: clamp(140px, 240px, 20vw);
     padding: 0.5em 1em;
     background-color: $primary-color;
@@ -75,25 +79,7 @@ li{
         background-color: $primary-dark;
         z-index: -1;
     }
-    .sub-cathegories-listed-items {
-        height: fit-content;
-        width: 100%;
-        @include flexit;
-        flex-direction: column;
-        margin: 0;
-        padding: 0;
-        a {
-            color: $primary-dark;
-            border-bottom: 2px solid $primary-dark;
-            border-radius: 2px;
-            padding: 0.5em 0;
-        }
-    }
     * { color: $primary-dark; }
-    .sub-cathegories-sum {
-        font-weight: 400;
-        b { font-weight: 600; }
-    }
     a{
         width: 100%;
         button{
@@ -108,12 +94,28 @@ li{
             text-transform: uppercase;
         }
     }
+    .nav-links__li__sub-cathegories__listed-items {
+        @include flexit;
+        flex-direction: column;
+        height: fit-content;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        a {
+            color: $primary-dark;
+            border-bottom: 2px solid $primary-dark;
+            border-radius: 2px;
+            padding: 0.5em 0;
+        }
+    }
+    .nav-links__li__sub-cathegories__sum {
+        font-weight: 400;
+        b { font-weight: 600; }
+    }
 }
 .currency{
     text-transform: lowercase;
 }
-
-
 .active{
     color: white;
     z-index: 2;

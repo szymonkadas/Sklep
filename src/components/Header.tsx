@@ -2,19 +2,20 @@ import { NavLink } from "react-router-dom";
 import "../style/components/css/Header.css";
 export default function Header(){
     return(
-        <header>
-            <div>Logo</div>
-            <nav>
-                <ol className="nav-links">
-                    <li><NavLink to="/" className={({ isActive, isPending }) =>
-                        isPending ? "pending" : isActive ? "active" : ""
-                    }>Strona Główna </NavLink></li>
-                    <li><NavLink to="/store" className={({ isActive, isPending }) =>
-                        isPending ? "pending" : isActive ? "active" : ""
-                    }> Sklep </NavLink>
-                        <div className="sub-cathegories-wrapper">
-                            <div className="sub-cathegories">
-                                <ol className="sub-cathegories-listed-items">
+        <header className="header">
+            <div className="header__logo">Logo</div>
+            <nav className="header__nav">
+                <ol className="nav__nav-links">
+                    <li className="nav-links__li">
+                        <NavLink to="/" className={({ isActive, isPending }) =>
+                            isPending ? "pending" : isActive ? "active" : ""
+                        }>Strona Główna </NavLink></li>
+                    <li className="nav-links__li"><NavLink to="/store" className={({ isActive, isPending }) =>
+                            isPending ? "pending" : isActive ? "active" : ""
+                        }> Sklep </NavLink>
+                        <div className="nav-links__li__sub-cathegories-wrapper">
+                            <div className="nav-links__li__sub-cathegories">
+                                <ol className="nav-links__li__sub-cathegories__listed-items">
                                     <NavLink to="/store/accesories" className={({ isActive, isPending }) =>
                                     isPending ? "pending" : isActive ? "active" : ""
                                     }>Akcesoria</NavLink>
@@ -27,29 +28,28 @@ export default function Header(){
                                 </ol>
                             </div>
                         </div>
-
                     </li>
-                    <li><NavLink to="/account" className={({ isActive, isPending }) =>
+                    <li className="nav-links__li"><NavLink to="/account" className={({ isActive, isPending }) =>
                                 isPending ? "pending" : isActive ? "active" : ""
-                    }>Konto</NavLink></li>
-                    <li><NavLink to="/about" className={({ isActive, isPending }) =>
+                        }>Konto</NavLink></li>
+                    <li className="nav-links__li"><NavLink to="/about" className={({ isActive, isPending }) =>
                             isPending ? "pending" : isActive ? "active" : ""
-                    }>O nas</NavLink></li>
-                    <li><NavLink to="/contact" className={({ isActive, isPending }) =>
+                        }>O nas</NavLink></li>
+                    <li className="nav-links__li"><NavLink to="/contact" className={({ isActive, isPending }) =>
                             isPending ? "pending" : isActive ? "active" : ""
-                    }>Kontakt</NavLink></li>
-                    <li><NavLink to="/ShoppingCart" className={({ isActive, isPending }) =>
+                        }>Kontakt</NavLink></li>
+                    <li className="nav-links__li"><NavLink to="/ShoppingCart" className={({ isActive, isPending }) =>
                             isPending ? "pending" : isActive ? "active" : ""
                         }>  600,92 <span className="currency">zł</span> 
                         </NavLink>
                             {/* Zrób obramowanie, i before'a tak żeby wyglądało to na ikonkę koszyka */}
-                        <div className="sub-cathegories-wrapper">
-                            <div className="sub-cathegories">
+                        <div className="nav-links__li__sub-cathegories-wrapper">
+                            <div className="nav-links__li__sub-cathegories">
                             {/* Zrób by był slider, gridem do ogarnięcia ig i max-heightem*/}
-                            <ol className="sub-cathegories-listed-items">
+                            <ol className="nav-links__li__sub-cathegories__listed-items">
                                 {/* <li>PRODUCT COMPONENT</li> */}
                             </ol>
-                            <div className="sub-cathegories-sum"><b>Kwota:</b> 600,92 <span className="currency">zł</span></div>
+                            <div className="nav-links__li__sub-cathegories__sum"><b>Kwota:</b> 600,92 <span className="currency">zł</span></div>
                             <NavLink to="/ShoppingCart"><button>Zobacz Koszyk</button></NavLink>
                             <NavLink to="/Checkout"><button>Zamów</button></NavLink>
                             </div>

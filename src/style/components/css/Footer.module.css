@@ -1,16 +1,18 @@
-footer {
+.footer {
+  position: relative;
+  bottom: 0px;
   display: grid;
   background-color: #262626;
 }
 
-.nav-links {
+.footer__nav-links {
   column-gap: 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.sub-footer {
+.footer__sub-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;

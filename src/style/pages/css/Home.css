@@ -1,0 +1,36 @@
+.hp__hero {
+  height: 80vh;
+  box-sizing: border-box;
+  background-position: "center, center";
+  background-size: "cover";
+  color: white;
+}
+.hp__hero .hp__hero__layout {
+  height: 100%;
+  margin: auto;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: fit-content;
+  gap: 2em;
+  align-content: center;
+}
+.hp__hero .hp__hero__layout .hp__hero__text-content-container {
+  height: fit-content;
+}
+.hp__hero .hp__hero__layout .hero__title {
+  font-size: 4.2rem;
+  line-height: 5.25rem;
+  text-transform: capitalize;
+}
+.hp__hero .hp__hero__layout .hero__description {
+  font-size: 2rem;
+  line-height: 2.5rem;
+  text-transform: capitalize;
+}
+.hp__hero .hp__hero__layout .hero__button {
+  background-color: #FAFAFA;
+  color: #262626;
+  border-style: none;
+  padding: 1em;
+}/*# sourceMappingURL=Home.css.map */

@@ -13,7 +13,22 @@ import NotFound from ".//pages/NotFound";
 //   Link
 
 
+export const hasOwnNestedProperty = function(obj:any, propertyPath:string) {
+  if (!propertyPath)
+    return false;
+  var properties = propertyPath.split('.');
 
+  for (var i = 0; i < properties.length; i++) {
+    var prop = properties[i];
+
+    if (!obj || !obj.hasOwnProperty(prop)) {
+      return false;
+    } else {
+      obj = obj[prop];
+    }
+  }
+  return true;
+};
 
 function App() {
   const router = createBrowserRouter(createRoutesFromElements(

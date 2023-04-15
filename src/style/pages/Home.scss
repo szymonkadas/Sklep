@@ -1,0 +1,47 @@
+@use "../mixins.scss" as *;
+@use "../variables.scss" as *;
+
+.hp__hero{
+    height: 80vh;
+    box-sizing: border-box;
+    background-position: "center, center";
+    background-size: "cover";
+    color: $primary-font-color;
+    // @include flexit(initial, center);
+    .hp__hero__layout{
+        height: 100%;
+        margin: auto;
+        max-width: 1200px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: fit-content;
+        gap: 2em;
+        align-content: center;
+        .hp__hero__text-content-container{
+            height: fit-content;
+        }
+        .hero__title{
+            font-size: $h1-fs;
+            line-height: $h1-lh;
+            text-transform: capitalize;
+        }
+        .hero__description{
+            font-size: $h4-fs;
+            line-height: $h4-lh;
+            text-transform: capitalize;
+        }
+        .hero__button{
+            background-color: $primary-color;
+            color: $primary-dark;
+            border-style: none;
+            padding: 1em;
+        }
+        .hero__button--filled{
+
+        }
+        .hero__button--unfilled{
+            
+        }
+    }
+
+}
