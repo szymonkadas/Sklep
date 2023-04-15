@@ -152,7 +152,7 @@ async function createFetchCollection(collectionRef: CollectionReference<Document
 
 const cathegoriesCollectionRef = collection(db, "home", "cathegories/cathegories")
 
-export const getCathegories = await createFetchCollection(cathegoriesCollectionRef)
+export const getCathegoriesData = await createFetchCollection(cathegoriesCollectionRef)
 
 interface CathegoryData {
   description: string;
@@ -173,7 +173,7 @@ export async function addCathegory(cathegoryData: CathegoryData) {
 
 const coopBrandsRef = collection(db, "home", "coop_brands", "coop_brands");
 
-export const getCoopBrands = await createFetchCollection(coopBrandsRef);
+export const getCoopBrandsData = await createFetchCollection(coopBrandsRef);
 
 const heroRef = doc(db, "/home", "hero");
 
@@ -186,7 +186,7 @@ export const getSpecialOfferData = await createFetchDoc(specialOfferRef);
 //Store section:
 const productsRef = collection(db, "/store");
 
-export const getProducts = await createFetchCollection(productsRef)
+export const getProductsData = await createFetchCollection(productsRef)
 
 
 // export async function getHostVans() {

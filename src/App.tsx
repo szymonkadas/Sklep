@@ -7,8 +7,8 @@ import {
 import Layout from "./components/Layout";
 import './style/App.css';
 // import Checkout from "./pages/Checkout";
-import Home, { loader } from "./pages/Home";
-import Store from "./pages/store/Store";
+import Home, { homeLoader } from "./pages/Home";
+import Store, { storeLoader } from "./pages/store/Store";
 import StoreAside from "./pages/store/StoreAside";
 import StoreLayout from "./pages/store/StoreLayout";
 // import ShoppingCart from "./pages/ShoppingCart";
@@ -36,8 +36,8 @@ export const hasOwnNestedProperty = function(obj:any, propertyPath:string) {
 function App() {
   const router = createBrowserRouter(createRoutesFromElements(
     <Route path="/" element={<Layout />} >
-      <Route index element={<Home />} loader={loader}></Route>
-      <Route path="/store" element={<StoreLayout />}>
+      <Route index element={<Home />} loader={homeLoader}></Route>
+      <Route path="/store" element={<StoreLayout />} loader={storeLoader}>
         <Route path="./" element={<Store />}></Route>
         <Route path="./" element={<StoreAside></StoreAside>}></Route>
       </Route>

@@ -4,8 +4,8 @@ import { hasOwnNestedProperty } from "../App";
 import {
   CollectionData,
   DocData,
-  getCathegories,
-  getCoopBrands,
+  getCathegoriesData,
+  getCoopBrandsData,
   getHeroData,
   getSpecialOfferData
 } from "../api";
@@ -15,7 +15,7 @@ import Hero from "../components/Home/Hero";
 import IconTextBlock from "../components/Home/IconTextBlock";
 import SpecialOffer from "../components/Home/SpecialOffer";
 import "../style/pages/css/Home.css";
-import LoaderFunction from "../utils/loaderInterfaces";
+import { createLoaderFunction } from "../utils/createLoaderFunction";
 
 interface LoaderData {
   cathegories: CollectionData;
@@ -24,32 +24,12 @@ interface LoaderData {
   specialOffer: DocData;
 }
 
-export const loader:LoaderFunction = async({ params, request })=>{
-  //this localstorage if is created purely because of need to decrease api requests which are limited.
-  //this could be decomponentised, to let products be rendered randomly etc, whilst rest be left in localstorage for some time.
-  let homePageData = localStorage.getItem("homePageData")
-  if(homePageData){
-    const data: LoaderData = JSON.parse(homePageData)
-    return{
-      cathegories: data.cathegories,
-      coopBrands: data.coopBrands,
-      hero: data.hero,
-      specialOffer: data.specialOffer
-    }
-  }
-  else{
-    console.log("API Request HomePage!")
-    const data: LoaderData = {
-      cathegories: await getCathegories(),
-      coopBrands: await getCoopBrands(),
-      hero: await getHeroData(),
-      specialOffer: await getSpecialOfferData()
-    }
-    localStorage.setItem('homePageData', JSON.stringify(data))
-    return data;
-  }
-}
-
+export const homeLoader = await createLoaderFunction(
+  [ {key: "cathegories", fetcher: getCathegoriesData}, 
+    {key: "coopBrands", fetcher: getCoopBrandsData},
+    {key: "hero", fetcher: getHeroData},
+    {key: "specialOffer", fetcher: getSpecialOfferData}
+  ], "homePageData")
 export interface homePageComponentsData{
   data: DocumentData
   photosPath?: string
