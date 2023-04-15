@@ -2,7 +2,9 @@
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import {
+  CollectionReference,
   DocumentData,
+  DocumentReference,
   addDoc,
   collection,
   doc,
@@ -100,43 +102,57 @@ export async function loginUser(email: string, password: string){
 //   return desiredUser.error;
 // }
 
+export interface DocData{
+  data?: DocumentData,
+  id?: string;
+  error: boolean | unknown
+}
 
+async function createFetchDoc(docRef: DocumentReference<DocumentData>){
+  return async function(){
+    try{
+      const querySnapshot = await getDoc<DocumentData>(docRef);
+      return{
+        data: querySnapshot.data(),
+        error: false
+      }
+    } catch(error){
+      console.log(error)
+      return{
+        data: undefined,
+        error: error
+      }
+    }
+  }
+}
 
+export interface CollectionData{
+  collectionData: {
+    [key: string]: any;
+  };
+  error: boolean | unknown;
+}
 
-
-
-
-
-
-
-
-
-
-
+async function createFetchCollection(collectionRef: CollectionReference<DocumentData>){
+  return async function(): Promise<CollectionData>{
+    try{
+      const querySnapshot = await getDocs(collectionRef);
+      const dataArr = querySnapshot.docs.map((doc) => ({
+        data: {...doc.data() },
+        id: doc.id,
+      }));
+      return {collectionData: dataArr, error: false};
+    } catch (error) {
+      console.log(error);
+      return {collectionData:[], error: error};
+    }
+  }
+}
 //Home Section
 
 const cathegoriesCollectionRef = collection(db, "home", "cathegories/cathegories")
 
-export interface Cathegory {
-  cathegoriesData: {
-    [key: string]: any;
-  };
-  id: string;
-}
-
-export async function getCathegories(): Promise<Cathegory[]> {
-  try {
-    const querySnapshot = await getDocs(cathegoriesCollectionRef);
-    const dataArr = querySnapshot.docs.map((doc) => ({
-      cathegoriesData: { ...doc.data() },
-      id: doc.id,
-    }));
-    return dataArr;
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
-}
+export const getCathegories = await createFetchCollection(cathegoriesCollectionRef)
 
 interface CathegoryData {
   description: string;
@@ -155,77 +171,22 @@ export async function addCathegory(cathegoryData: CathegoryData) {
 }
 
 
-const coopBrandsRef = collection(db, "home", "coop_brands", "coop_brands")
+const coopBrandsRef = collection(db, "home", "coop_brands", "coop_brands");
 
-export interface CoopBrand {
-  collectionData: {
-    [key: string]: any;
-  };
-  id: string;
-}
+export const getCoopBrands = await createFetchCollection(coopBrandsRef);
 
-export async function getCoopBrands(): Promise<CoopBrand[]> {
-  try {
-    const querySnapshot = await getDocs(coopBrandsRef);
-    const dataArr = querySnapshot.docs.map((doc) => ({
-      collectionData: { ...doc.data() },
-      id: doc.id,
-    }));
-    return dataArr;
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
-}
+const heroRef = doc(db, "/home", "hero");
 
+export const getHeroData = await createFetchDoc(heroRef);
 
-export interface HeroData{
-  heroData: DocumentData | undefined,
-  error: boolean | unknown
-}
+const specialOfferRef = doc(db, "/home", "special_offer");
 
-export async function getHeroData(): Promise<HeroData>{
-  try{
-    const heroRef = doc(db, "/home", "hero")
-    const querySnapshot = await getDoc<DocumentData>(heroRef);
-    return{
-      heroData: querySnapshot.data(),
-      error: false
-    }
-  } catch(error){
-    console.log(error)
-    return{
-      heroData: undefined,
-      error: error
-    }
-  }
-}
+export const getSpecialOfferData = await createFetchDoc(specialOfferRef);
 
-export interface SpecialOfferData{
-  specialOfferData: DocumentData | undefined,
-  error: boolean | unknown
-}
+//Store section:
+const productsRef = collection(db, "/store");
 
-export async function getSpecialOfferData():Promise<SpecialOfferData>{
-  try{
-    const specialOfferRef = doc(db, "/home", "special_offer")
-    const querySnapshot = await getDoc<DocumentData>(specialOfferRef);
-    return{
-      specialOfferData: querySnapshot.data(),
-      error: false
-    }
-  } catch(error){
-    console.log(error)
-    return{
-      specialOfferData: undefined,
-      error: error
-    }
-  }
-}
-
-
-
-
+export const getProducts = await createFetchCollection(productsRef)
 
 
 // export async function getHostVans() {

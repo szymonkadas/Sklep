@@ -2,15 +2,15 @@ import { DocumentData } from "firebase/firestore/lite"
 import { homePageComponentsData } from "../../pages/Home"
 
 interface Cathegory{
-    cathegoriesData: DocumentData,
+    data: DocumentData,
     id: string
 }
 export default function Cathegories(props: homePageComponentsData){
     const cathegories = props.data.map( (cathegory:Cathegory) =>{
       const localStyle = {
-        backgroundImage: `url(${props.photosPath+cathegory.cathegoriesData.photo})`,
+        backgroundImage: `url(${props.photosPath+cathegory.data.photo})`,
       }
-      const data = cathegory.cathegoriesData
+      const data = cathegory.data
       return <div className="cathgegories__cathegory-block" style={localStyle} key={`cathegory${cathegory.id}div`}>
         <h3 className="cathegories__cathegory-block__title">{data.title}</h3>
         <p className="cathegories__cathegory-block__description">{data.description}</p>

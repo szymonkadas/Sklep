@@ -2,10 +2,8 @@ import { DocumentData } from "firebase/firestore/lite";
 import { useLoaderData } from "react-router";
 import { hasOwnNestedProperty } from "../App";
 import {
-  Cathegory,
-  CoopBrand,
-  HeroData,
-  SpecialOfferData,
+  CollectionData,
+  DocData,
   getCathegories,
   getCoopBrands,
   getHeroData,
@@ -17,19 +15,13 @@ import Hero from "../components/Home/Hero";
 import IconTextBlock from "../components/Home/IconTextBlock";
 import SpecialOffer from "../components/Home/SpecialOffer";
 import "../style/pages/css/Home.css";
+import LoaderFunction from "../utils/loaderInterfaces";
 
-interface LoaderParams {
-  params: unknown;
-  request: unknown;
-}
 interface LoaderData {
-  cathegories: Cathegory[];
-  coopBrands: CoopBrand[];
-  hero: HeroData;
-  specialOffer: SpecialOfferData;
-}
-interface LoaderFunction {
-  (params: LoaderParams): Promise<LoaderData>;
+  cathegories: CollectionData;
+  coopBrands: CollectionData;
+  hero: DocData;
+  specialOffer: DocData;
 }
 
 export const loader:LoaderFunction = async({ params, request })=>{
@@ -70,8 +62,8 @@ export default function Home(){
     return(
         <>
           {/* loaderData.hero.heroData was put after hasOwnNested, because TS couldn't see that the problem with possible undefined was resolved so i safely put this after hONP */}
-          {hasOwnNestedProperty(loaderData, "hero.heroData") && loaderData.hero.heroData && 
-          <Hero data={loaderData.hero.heroData} photosPath={photosPath}></Hero>}
+          {hasOwnNestedProperty(loaderData, "hero.data") && loaderData.hero.data && 
+          <Hero data={loaderData.hero.data} photosPath={photosPath}></Hero>}
           <section className="hp__section hp__section--1">
             {Object.hasOwn(loaderData, "coopBrands") && 
             <div className="brands-swiper">
@@ -79,23 +71,23 @@ export default function Home(){
                 <i className="brands-swiper__button--left"></i>
               </button>
               <div className="brands-swiper__container">
-                <Brands data={loaderData.coopBrands} photosPath={photosPath}></Brands>
+                <Brands data={loaderData.coopBrands.collectionData} photosPath={photosPath}></Brands>
               </div>
               <button className="brands-swiper__button">
                 <i className="brands-swiper__button--right"></i>
               </button>              
             </div>}
             {Object.hasOwn(loaderData, "cathegories") && 
-            <Cathegories data={loaderData.cathegories} photosPath={photosPath}></Cathegories>
+            <Cathegories data={loaderData.cathegories.collectionData} photosPath={photosPath}></Cathegories>
             }
           </section>
           <section className="hp__section hp__section--2">
             <div className="products-wrapper">
               <h1 className="products__h1">Featured Products</h1>
             </div>
-            {hasOwnNestedProperty(loaderData, "specialOffer.specialOfferData") && loaderData.specialOffer.specialOfferData && 
+            {hasOwnNestedProperty(loaderData, "specialOffer.data") && loaderData.specialOffer.data && 
             <SpecialOffer 
-                data={loaderData.specialOffer.specialOfferData} 
+                data={loaderData.specialOffer.data} 
                 photosPath={photosPath} 
             />}
           </section>
