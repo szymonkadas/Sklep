@@ -23,6 +23,8 @@ body{
 }
 main{
   min-height: 90vh;
+  /* delete when shop styling is done */
+  padding-top: 20vh;
 }
 /* main{
   margin-top: -112px;

@@ -8,9 +8,8 @@ import Layout from "./components/Layout";
 import './style/App.css';
 // import Checkout from "./pages/Checkout";
 import Home, { homeLoader } from "./pages/Home";
-import Store, { storeLoader } from "./pages/store/Store";
-import StoreAside from "./pages/store/StoreAside";
-import StoreLayout from "./pages/store/StoreLayout";
+import Store from "./pages/store/Store";
+import StoreLayout, { storeLoader } from "./pages/store/StoreLayout";
 // import ShoppingCart from "./pages/ShoppingCart";
 import NotFound from ".//pages/NotFound";
 //   Link
@@ -37,9 +36,9 @@ function App() {
   const router = createBrowserRouter(createRoutesFromElements(
     <Route path="/" element={<Layout />} >
       <Route index element={<Home />} loader={homeLoader}></Route>
-      <Route path="/store" element={<StoreLayout />} loader={storeLoader}>
-        <Route path="./" element={<Store />}></Route>
-        <Route path="./" element={<StoreAside></StoreAside>}></Route>
+      <Route element={<StoreLayout />} loader={storeLoader}>
+        <Route path="/store" element={<Store />}></Route>
+        {/* <Route path="./" element={<StoreAside></StoreAside>}></Route> */}
       </Route>
       {/* Gotta use protected routes for account routes, remember about that. */}
       {/* <Route path="/account" element={<Login />}></Route> */}

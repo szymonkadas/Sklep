@@ -1,5 +1,6 @@
 import { LoaderFunction } from "react-router";
 import { CollectionData, DocData } from "../api";
+
 interface dataKeys{
     key: string, 
     fetcher: ()=>Promise<CollectionData | DocData>
@@ -21,9 +22,9 @@ export async function createLoaderFunction(dataKeys: dataKeys[], localStorageKey
             async function fetchData(dataKeys: dataKeys[]) {
                 const entries = await Promise.all(
                     dataKeys.map(async (dataKey) => {
-                    const value = await dataKey.fetcher();
-                    console.log(value)
-                    return [dataKey.key, value];
+                        const value = await dataKey.fetcher();
+                        console.log(value)
+                        return [dataKey.key, value];
                     })
                 );
               return Object.fromEntries(entries);

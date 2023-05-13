@@ -10,7 +10,8 @@ import {
   doc,
   getDoc,
   getDocs,
-  getFirestore
+  getFirestore,
+  setDoc
 } from "firebase/firestore/lite";
 
 
@@ -150,10 +151,6 @@ async function createFetchCollection(collectionRef: CollectionReference<Document
 }
 //Home Section
 
-const cathegoriesCollectionRef = collection(db, "home", "cathegories/cathegories")
-
-export const getCathegoriesData = await createFetchCollection(cathegoriesCollectionRef)
-
 interface CathegoryData {
   description: string;
   title: string;
@@ -170,6 +167,9 @@ export async function addCathegory(cathegoryData: CathegoryData) {
   }
 }
 
+const cathegoriesCollectionRef = collection(db, "home", "cathegories/cathegories")
+
+export const getCathegoriesData = await createFetchCollection(cathegoriesCollectionRef)
 
 const coopBrandsRef = collection(db, "home", "coop_brands", "coop_brands");
 
@@ -188,14 +188,26 @@ const productsRef = collection(db, "/store");
 
 export const getProductsData = await createFetchCollection(productsRef)
 
-
-// export async function getHostVans() {
-//     const q = query(vansCollectionRef, where("hostId", "==", "123"))
-//     const querySnapshot = await getDocs(q)
-//     const dataArr = querySnapshot.docs.map(doc => ({
-//         ...doc.data(),
-//         id: doc.id
-//     }))
-//     return dataArr
-// }
-
+export interface productData{
+  count: number,
+  currency: string,
+  discount: boolean,
+  discount_price: number,
+  home_page_display: boolean,
+  name: string,
+  photo: string,
+  price: number,
+  rating: string
+  cathegory: "man" | "woman" | "unisex" | "accessories"
+}
+export async function addStoreProduct(data: productData, id: string){
+    try {
+      const newDocRef = doc(db, "store", id);
+      await setDoc(newDocRef, {
+        ...data
+      })
+    console.log("Document written with ID: ", newDocRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+}
