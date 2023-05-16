@@ -1,9 +1,8 @@
-import { ChangeEvent, FC, useCallback, useState } from 'react';
-
+import { ChangeEvent, FC, useCallback, useContext, useEffect, useState } from 'react';
+import { StoreData } from '../../pages/store/StoreLayout';
 interface SearchbarProps{
-    priceRange: priceRange,
-    currentPriceRange: priceRange,
-    setCurrentPriceRange: React.Dispatch<React.SetStateAction<priceRange>>
+    usersPriceRange: priceRange,
+    setUsersPriceRange: React.Dispatch<React.SetStateAction<priceRange>>
 }
 export type priceRange = {
     maxPrice: number,
@@ -13,29 +12,36 @@ export type priceRange = {
 // also the price could be instead of transitioning from "," to "." because of toFixed, would maintain "," as a separator
 //There's one currency meant to be, so i'll just give it hard coded pln
 const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps)=>{
-    const [min, setMin] = useState(props.currentPriceRange.minPrice.toFixed(2));
-    const [max, setMax] = useState(props.currentPriceRange.maxPrice.toFixed(2));
+    const [min, setMin] = useState(props.usersPriceRange.minPrice.toFixed(2));
+    const [max, setMax] = useState(props.usersPriceRange.maxPrice.toFixed(2));
     const [priceRangeValidity, setPriceRangeValidity] = useState(true);
-
+    const priceRange = useContext(StoreData).priceRange;
+    //I have no idea why do i have to use useEffect, but without this, state won't change on props update FROM OUTSIDE!.
+    useEffect(()=>{
+        setMin(props.usersPriceRange.minPrice.toFixed(2));
+        setMax(props.usersPriceRange.maxPrice.toFixed(2));
+    }, [props])
     const maxInputPrice = 99999999;
     const pricePattern = /^\d+([.,]\d+)?$/
     //visualiser style
-    const visualiserWidth = props.priceRange.maxPrice - props.priceRange.minPrice;
-    const paddLeft = (parseFloat(min) - props.priceRange.minPrice)/visualiserWidth;
-    const paddRight = (props.priceRange.maxPrice - parseFloat(max))/visualiserWidth;
+    const visualiserWidth = priceRange.maxPrice - priceRange.minPrice;
+    const paddLeft = (parseFloat(min) - priceRange.minPrice)/visualiserWidth;
+    const paddRight = (priceRange.maxPrice - parseFloat(max))/visualiserWidth;
     const visualiserStyle = { 
         padding: `0, ${paddRight}%, 0, ${paddLeft}%`
     }
     const incorrectPriceRangeClass = priceRangeValidity ? "" : "store-aside__price-filter__input--incorrect"
     
-    const submitPriceRange = ()=>{
+    const submitUsersPriceRange = ()=>{
         checkPriceRangeValidity(min, max)
         if(priceRangeValidity){
-            props.setCurrentPriceRange({minPrice: parseFloat(min), maxPrice:parseFloat(max)})
+            props.setUsersPriceRange({minPrice: parseFloat(min), maxPrice:parseFloat(max)})
         }
         return
     }
     const checkPriceRangeValidity = useCallback((min:string, max:string)=>{
+        max = max === "" ? priceRange.maxPrice.toFixed(2) : max;
+        min = min === "" ? priceRange.minPrice.toFixed(2) : min;
         if(!pricePattern.test(max) || !pricePattern.test(min)){
             setPriceRangeValidity(false)
         }else{
@@ -82,7 +88,7 @@ const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps)=>{
                     value={min} 
                     onChange={(event)=>handlePriceChange(event, setMin)} 
                     onBlur={(event)=>handleFinishedChanges(event)} 
-                    placeholder='min'>
+                    placeholder='od'>
                 </input>
                 <span  className="store-aside__price-filter__input-divider" > - </span>Price
                 <input key="priceSetterMax" 
@@ -93,7 +99,7 @@ const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps)=>{
                     value={max} 
                     onChange={(event)=>handlePriceChange(event, setMax)} 
                     onBlur={(event)=>handleFinishedChanges(event)} 
-                    placeholder='max'>
+                    placeholder='do'>
                 </input>
             </div>
             <div className="store-aside__price-filter__interface">
@@ -101,13 +107,13 @@ const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps)=>{
                     style={visualiserStyle}>
                 </div>
                 <button className="store-aside__price-filter__interface__button" 
-                    onClick={()=>submitPriceRange()}>Search
+                    onClick={()=>submitUsersPriceRange()}>Search
                 </button> 
                 <span className="store-aside__price-filter__interface__text">
                     Cena: 
-                        <b>{props.currentPriceRange.minPrice.toFixed(2)} zł</b> 
+                        <b>{props.usersPriceRange.minPrice.toFixed(2)} zł</b> 
                         -   
-                        <b>{props.currentPriceRange.maxPrice.toFixed(2)} zł</b>
+                        <b>{props.usersPriceRange.maxPrice.toFixed(2)} zł</b>
                 </span>
             </div>
         </div>

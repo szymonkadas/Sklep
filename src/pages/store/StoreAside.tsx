@@ -1,32 +1,29 @@
 import { useMemo } from "react"
-import { storeDisplayCathegory } from "../../components/Store/CathegoriesFilter"
 import Searchbar from "../../components/Store/Searchbar"
 import { arrayData, product } from "./StoreLayout"
 // import PriceSetter from "../../components/Store/PriceSetter"
 import CathegoriesFilter from "../../components/Store/CathegoriesFilter"
 import PriceSetter, { priceRange } from "../../components/Store/PriceSetter"
 
-
 export type storeAsideProps = {
     searchVal: string,
     setSearchVal: React.Dispatch<React.SetStateAction<string>>
     currentCathegory: string,
-    setCathegory: React.Dispatch<React.SetStateAction<string>>,
+    setCurrentCathegory: React.Dispatch<React.SetStateAction<string>>,
     filteredProducts: arrayData,
-    cathegories: storeDisplayCathegory[],
-    priceRange: priceRange,
-    currentPriceRange: priceRange,
-    setCurrentPriceRange: React.Dispatch<React.SetStateAction<priceRange>>
+    usersPriceRange: priceRange,
+    setUsersPriceRange: React.Dispatch<React.SetStateAction<priceRange>>
+    clearFilters: () => void
 }
 //product namesy tutaj liczyć.
 const StoreAside = function(props:storeAsideProps){
-    const productNames = useMemo(()=>createProductNames(props.filteredProducts), [props.searchVal, props.currentCathegory])
-
+    const productNames = useMemo(()=>createProductNames(props.filteredProducts), [props.filteredProducts])
     return(
         <aside className="store-aside">
+            <button onClick={()=>props.clearFilters()}>Clear filters</button>     
             <Searchbar productNames={productNames} setSearchVal={props.setSearchVal}></Searchbar>
-            <PriceSetter priceRange={props.priceRange} currentPriceRange={props.currentPriceRange} setCurrentPriceRange={props.setCurrentPriceRange}></PriceSetter>
-             <CathegoriesFilter cathegories={props.cathegories} setCathegory={props.setCathegory}></CathegoriesFilter>
+            <PriceSetter usersPriceRange={props.usersPriceRange} setUsersPriceRange={props.setUsersPriceRange}></PriceSetter>
+            <CathegoriesFilter setCurrentCathegory={props.setCurrentCathegory}></CathegoriesFilter>   
         </aside>
     )
 
