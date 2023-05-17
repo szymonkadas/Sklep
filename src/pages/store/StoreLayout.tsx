@@ -1,4 +1,4 @@
-import { FC, Suspense, createContext, lazy, useEffect, useMemo, useState } from "react";
+import { FC, Suspense, createContext, lazy, useMemo, useState } from "react";
 import { Outlet, useLoaderData } from "react-router";
 import { CollectionData, getCathegoriesData, getProductsData, productData } from "../../api";
 import { storeDisplayCathegory } from "../../components/Store/CathegoriesFilter";
@@ -15,10 +15,7 @@ interface LoaderData {
 export type arrayData = {
     [key: string]: any
 }
-export type product = {
-    data: productData;
-}
-type fetchedProductData = {
+export type fetchedProductData = {
     data: productData,
     id: string
 }
@@ -26,43 +23,31 @@ type fetchedProductData = {
 export const storeLoader = await createLoaderFunction([{key: "products", fetcher: getProductsData}, {key: "cathegories", fetcher: getCathegoriesData}], "storeData");
 
 type StoreData = {
-    priceRange: priceRange,
-    cathegories: storeDisplayCathegory[],
-    productsCount: number
+    products: arrayData,
+    cathegories: storeDisplayCathegory[]
 }
 export const StoreData = createContext<StoreData>({
-    priceRange: {maxPrice: 0, minPrice: 0},
-    cathegories: [{cathegoryName: "all", differentProductsCount: 0}],
-    productsCount: 0
+    products: {},
+    cathegories: [{cathegoryName: "all", differentProductsCount: 0}]
 });
 
 const StoreLayout: FC = function(){
 try{
     const data = useLoaderData() as LoaderData;
-    if(!data){
-        throw("Błąd fetcha")
-    }
+    if(!data) throw("Błąd fetcha");
+    
     const [searchVal, setSearchVal] = useState("");
     const [currentCathegory, setCurrentCathegory] = useState("");
-    const [filteredProducts, setFilteredProducts] = useState(filterProducts(data.products.collectionData))
-    const priceRange:priceRange = useMemo(() => getPriceRange(data.products.collectionData, currentCathegory), [currentCathegory, filteredProducts]);
-    const cathegories:storeDisplayCathegory[] = useMemo(()=>getCathegoriesDataForDisplay(data.cathegories.collectionData, data.products.collectionData), []);
-    const productsCount:number = useMemo(()=> countProducts(filteredProducts, currentCathegory, searchVal).differentProductsCount, [filteredProducts, currentCathegory, searchVal])
-    const [usersPriceRange, setUsersPriceRange] =  useState(priceRange);
-    //I know i should use useEffect only for external mechanisms but, this pretty much does all the watching job, like useMemo so...
-    useEffect(()=>{
-        setUsersPriceRange(priceRange)
-    }, [priceRange])
-    useEffect(()=>{
-        setFilteredProducts(filterProducts(data.products.collectionData, searchVal, currentCathegory))
-    }, [searchVal, currentCathegory])
+    const [usersPriceRange, setUsersPriceRange] =  useState(getPriceRange(data.products.collectionData));
+    const filteredProducts: arrayData = useMemo(()=>filterProducts(data.products.collectionData, searchVal, currentCathegory, usersPriceRange), [searchVal, currentCathegory, usersPriceRange])
+    const cathegories: storeDisplayCathegory[] = useMemo(()=>getCathegoriesDataForDisplay(data.cathegories.collectionData, data.products.collectionData), [searchVal]);
     
     const clearFilters = ()=>{
         setSearchVal("");
         setCurrentCathegory("");
-        setFilteredProducts(data.products.collectionData);
-        setUsersPriceRange(priceRange);
+        setUsersPriceRange(getPriceRange(data.products.collectionData))
     }
+    
     const StoreAsideProps: storeAsideProps = {
         searchVal,
         setSearchVal,
@@ -73,43 +58,43 @@ try{
         setUsersPriceRange,
         clearFilters
     }
-    // console.log(currentCathegory, priceRange, usersPriceRange, productsCount);
+    
     return(
         <>
             <Suspense fallback={<div>Loading...</div>}>
-                <StoreData.Provider value={{priceRange, cathegories, productsCount}}>
+                <StoreData.Provider value={{products: data.products.collectionData, cathegories}}>
                     <StoreAside {...StoreAsideProps}></StoreAside>
                 </StoreData.Provider>
             </Suspense>
-            <Outlet/>
+            <Outlet context={filteredProducts}/>
         </>
     )
 }catch(error){
     console.log(error)
     return(
         <div className="store-layout__error">
-        Wystąpił błąd w połączeniu
+            Wystąpił błąd w połączeniu
         </div>
     )
 }
 }
 
-function filterProducts(data: arrayData , searchVal?: string, cathegory?: string, priceRange?: priceRange){
+export function filterProducts(data: arrayData , searchVal?: string, cathegory?: string, priceRange?: priceRange){
     let result = JSON.parse(JSON.stringify(data));
     if(searchVal !== undefined){
-        result = result.filter((product:product) => product.data.name.toLowerCase().includes(searchVal))
+        result = result.filter((product:productData) => product.name.toLowerCase().includes(searchVal))
     }if(cathegory !== undefined && cathegory.length > 0){
-        result = result.filter((product:product) => product.data.cathegory === cathegory)
+        result = result.filter((product:productData) => product.cathegory === cathegory)
     }if(priceRange !== undefined){
-        result = result.filter((product:product) => {
-            if(product.data.discount && product.data.discount_price){
-                if(product.data.discount_price >= priceRange.minPrice 
-                && product.data.discount_price <= priceRange.maxPrice){
+        result = result.filter((product:productData) => {
+            if(product.discount && product.discount_price){
+                if(product.discount_price >= priceRange.minPrice 
+                && product.discount_price <= priceRange.maxPrice){
                     return product
                 }
-            }else if(product.data.price){
-                if(product.data.price >= priceRange.minPrice 
-                && product.data.price <= priceRange.maxPrice){
+            }else if(product.price){
+                if(product.price >= priceRange.minPrice 
+                && product.price <= priceRange.maxPrice){
                     return product
                 }
             }
@@ -119,15 +104,13 @@ function filterProducts(data: arrayData , searchVal?: string, cathegory?: string
 }
 
 function getCathegoriesDataForDisplay(cathegories: arrayData, productsData: arrayData):storeDisplayCathegory[]{
-    return countDifferentProducts(getCathegoriesNames(cathegories), productsData)
-}
-
-function getCathegoriesNames(data: arrayData):string[]{
-    let dataCopy:arrayData[] = JSON.parse(JSON.stringify(data));
-    return dataCopy.map((cathegory:any)=>{
+    let cathegoriesDataCopy: arrayData[] = JSON.parse(JSON.stringify(cathegories));
+    const cathegoriesNames = cathegoriesDataCopy.map((cathegory:any)=>{
         return cathegory.data.cathegory
     })
+    return countProductsPerCathegory(cathegoriesNames, productsData)
 }
+
 function countProducts(data: arrayData, cathegoryName: string | false = false, searchVal: string = ""){
     return data.reduce((accumulator: storeDisplayCathegory , currVal: fetchedProductData)=>{
         if(currVal.data.name.toLowerCase().includes(searchVal)){
@@ -141,14 +124,14 @@ function countProducts(data: arrayData, cathegoryName: string | false = false, s
         return accumulator;
     }, {cathegoryName, differentProductsCount: 0})
 }
-function countDifferentProducts(cathegories: arrayData, productsData: arrayData):storeDisplayCathegory[]{
-    const cathegoriesCopy:string[] = JSON.parse(JSON.stringify(cathegories));
-    return cathegoriesCopy.map((cathegoryName: string)=>{
+
+export function countProductsPerCathegory(cathegories: arrayData, productsData: arrayData):storeDisplayCathegory[]{
+    return cathegories.map((cathegoryName: string)=>{
        return countProducts(productsData, cathegoryName)
     })
 }
 
-function getPriceRange(productsData: arrayData, cathegory: string | false = false):priceRange{
+export function getPriceRange(productsData: arrayData, cathegory: string | false = false):priceRange{
     let dataCopy = JSON.parse(JSON.stringify(productsData));
     const result = dataCopy.reduce((accumulator: priceRange, currVal: fetchedProductData, index: number, arrayData: arrayData)=>{
         if (cathegory && currVal.data.cathegory !== cathegory) return accumulator;
@@ -168,7 +151,6 @@ function getPriceRange(productsData: arrayData, cathegory: string | false = fals
         }
     }, {maxPrice: 0, minPrice: null})
     if (result.minPrice === null) {
-        console.log("There was no minimal price value!")
         return {maxPrice: result.maxPrice, minPrice: result.maxPrice}
     }
     return result

@@ -197,7 +197,7 @@ export interface productData{
   name: string,
   photo: string,
   price: number,
-  rating: string
+  rating: string,
   cathegory: "man" | "woman" | "unisex" | "accessories"
 }
 export async function addStoreProduct(data: productData, id: string){
