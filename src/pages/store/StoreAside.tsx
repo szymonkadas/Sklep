@@ -13,7 +13,6 @@ export type storeAsideProps = {
     setUsersPriceRange: React.Dispatch<React.SetStateAction<priceRange>>
     clearFilters: () => void
 }
-//product namesy tutaj liczyć.
 const StoreAside = function(props:storeAsideProps){
     const products = useContext(StoreData).products;
     const searchbarFilteredNames = useMemo(()=>createProductNames(filterProducts(products, undefined, props.currentCathegory, props.usersPriceRange )), [props.filteredProducts, props.searchVal])
@@ -29,11 +28,12 @@ const StoreAside = function(props:storeAsideProps){
             filteredCathegoriesProductMap.set(product.data.cathegory, 1)
         }
     })
+
     return(
         <aside className="store-aside">
             <button onClick={()=>props.clearFilters()}>Clear filters</button>     
             <Searchbar productNames={searchbarFilteredNames} searchVal={props.searchVal} setSearchVal={props.setSearchVal}></Searchbar>
-            <PriceSetter usersPriceRange={props.usersPriceRange} setUsersPriceRange={props.setUsersPriceRange}></PriceSetter>
+            <PriceSetter usersPriceRange={props.usersPriceRange} setUsersPriceRange={props.setUsersPriceRange} currentCathegory={props.currentCathegory}></PriceSetter>
             <CathegoriesFilter filteredCathegoriesProductMap={filteredCathegoriesProductMap} setCurrentCathegory={props.setCurrentCathegory}></CathegoriesFilter>   
         </aside>
     )

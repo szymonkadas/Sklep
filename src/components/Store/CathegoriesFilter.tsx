@@ -10,14 +10,13 @@ interface cathegoriesProps{
 }
 
 const CathegoriesFilter: FC<cathegoriesProps> = (props)=>{
-    let productsSum = 0;
+    const allCathegoriesSelector = useContext(StoreData).allCathegoriesSelector
     let filteredProductsSum = 0;
     const cathegories = useContext(StoreData).cathegories.map(cathegory => {
         let filteredProductsCount = 0
         if(props.filteredCathegoriesProductMap.has(cathegory.cathegoryName)){
             filteredProductsCount = props.filteredCathegoriesProductMap.get(cathegory.cathegoryName)!
         }
-        productsSum += cathegory.differentProductsCount;
         filteredProductsSum += filteredProductsCount;
         return <li className="store-aside__cathegories-filter__listing">
             <a href="javascript:void(0);" className="store-aside__cathegories-filter__listing__link"
@@ -34,9 +33,9 @@ const CathegoriesFilter: FC<cathegoriesProps> = (props)=>{
                 <li className="store-aside__cathegories-filter__listing">
                     <a href="javascript:void(0);" className="store-aside__cathegories-filter__listing__link"
                         onClick={()=>props.setCurrentCathegory("")}>
-                        all
+                        {allCathegoriesSelector.cathegoryName}
                     </a>
-                    <span className="store-aside__cathegories-filter__listing__products-count">(<b>{filteredProductsSum}</b>/{productsSum})</span>
+                    <span className="store-aside__cathegories-filter__listing__products-count">(<b>{filteredProductsSum}</b>/{allCathegoriesSelector.differentProductsCount})</span>
                 </li>
                 {...cathegories}
             </ul>

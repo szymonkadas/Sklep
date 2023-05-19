@@ -1,4 +1,4 @@
-import { FC, Suspense, createContext, lazy, useMemo, useState } from "react";
+import { FC, Suspense, createContext, lazy, useEffect, useMemo, useState } from "react";
 import { Outlet, useLoaderData } from "react-router";
 import { CollectionData, getCathegoriesData, getProductsData, productData } from "../../api";
 import { storeDisplayCathegory } from "../../components/Store/CathegoriesFilter";
@@ -8,44 +8,42 @@ import { storeAsideProps } from "./StoreAside";
 // import StoreAside from "./StoreAside";
 const StoreAside = lazy(()=> import("./StoreAside"));
 
-interface LoaderData {
-    products: CollectionData,
-    cathegories: CollectionData
-}
-export type arrayData = {
-    [key: string]: any
-}
-export type fetchedProductData = {
-    data: productData,
-    id: string
-}
+interface LoaderData { products: CollectionData, cathegories: CollectionData }
+export type arrayData = { [key: string]: any }
+export type fetchedProductData = { data: productData, id: string }
+type storeDisplayCathegoriesData = { cathegories: storeDisplayCathegory[], allCathegoriesSelector: storeDisplayCathegory }
+interface StoreData extends storeDisplayCathegoriesData { products: arrayData, clearFiltersStatus: boolean }
 
 export const storeLoader = await createLoaderFunction([{key: "products", fetcher: getProductsData}, {key: "cathegories", fetcher: getCathegoriesData}], "storeData");
 
-type StoreData = {
-    products: arrayData,
-    cathegories: storeDisplayCathegory[]
-}
+// Later on it could be moved for language selection purposes, would have to translate cathegories in database on run.
+const allCathegoriesSelectorName = "all"
 export const StoreData = createContext<StoreData>({
     products: {},
-    cathegories: [{cathegoryName: "all", differentProductsCount: 0}]
+    cathegories: [{cathegoryName: allCathegoriesSelectorName, differentProductsCount: 0}],
+    allCathegoriesSelector: {cathegoryName: allCathegoriesSelectorName, differentProductsCount: 0},
+    clearFiltersStatus: false
 });
 
 const StoreLayout: FC = function(){
 try{
     const data = useLoaderData() as LoaderData;
     if(!data) throw("Błąd fetcha");
-    
     const [searchVal, setSearchVal] = useState("");
     const [currentCathegory, setCurrentCathegory] = useState("");
     const [usersPriceRange, setUsersPriceRange] =  useState(getPriceRange(data.products.collectionData));
     const filteredProducts: arrayData = useMemo(()=>filterProducts(data.products.collectionData, searchVal, currentCathegory, usersPriceRange), [searchVal, currentCathegory, usersPriceRange])
-    const cathegories: storeDisplayCathegory[] = useMemo(()=>getCathegoriesDataForDisplay(data.cathegories.collectionData, data.products.collectionData), [searchVal]);
-    
+    const cathegoriesData = useMemo(()=>getCathegoriesDataForDisplay(data.cathegories.collectionData, data.products.collectionData), [searchVal]);
+    const [clearFiltersStatus, setClearFiltersStatus] = useState(false)
+    // essentially when anything is modified clearFilter is nullified.
+    useEffect(()=>{
+        setClearFiltersStatus(false)
+    }, [searchVal, currentCathegory, usersPriceRange])
     const clearFilters = ()=>{
         setSearchVal("");
         setCurrentCathegory("");
         setUsersPriceRange(getPriceRange(data.products.collectionData))
+        setClearFiltersStatus(true)
     }
     
     const StoreAsideProps: storeAsideProps = {
@@ -62,7 +60,12 @@ try{
     return(
         <>
             <Suspense fallback={<div>Loading...</div>}>
-                <StoreData.Provider value={{products: data.products.collectionData, cathegories}}>
+                <StoreData.Provider value={{
+                    products: data.products.collectionData, 
+                    cathegories: cathegoriesData.cathegories,
+                    allCathegoriesSelector: cathegoriesData.allCathegoriesSelector,
+                    clearFiltersStatus
+                }}>
                     <StoreAside {...StoreAsideProps}></StoreAside>
                 </StoreData.Provider>
             </Suspense>
@@ -105,14 +108,6 @@ export function filterProducts(data: arrayData , searchVal?: string, cathegory?:
     return result;
 }
 
-function getCathegoriesDataForDisplay(cathegories: arrayData, productsData: arrayData):storeDisplayCathegory[]{
-    let cathegoriesDataCopy: arrayData[] = JSON.parse(JSON.stringify(cathegories));
-    const cathegoriesNames = cathegoriesDataCopy.map((cathegory:any)=>{
-        return cathegory.data.cathegory
-    })
-    return countProductsPerCathegory(cathegoriesNames, productsData)
-}
-
 function countProducts(data: arrayData, cathegoryName: string | false = false, searchVal: string = ""){
     return data.reduce((accumulator: storeDisplayCathegory , currVal: fetchedProductData)=>{
         if(currVal.data.name.toLowerCase().includes(searchVal)){
@@ -126,13 +121,23 @@ function countProducts(data: arrayData, cathegoryName: string | false = false, s
         return accumulator;
     }, {cathegoryName, differentProductsCount: 0})
 }
-
-export function countProductsPerCathegory(cathegories: arrayData, productsData: arrayData):storeDisplayCathegory[]{
-    return cathegories.map((cathegoryName: string)=>{
-       return countProducts(productsData, cathegoryName)
+function countProductsPerCathegory(cathegories: arrayData, productsData: arrayData):storeDisplayCathegoriesData{
+    let sumOfAllCathegories = 0;
+    const result: storeDisplayCathegory[] = cathegories.map((cathegoryName: string)=>{
+       const countedProducts = countProducts(productsData, cathegoryName);
+       sumOfAllCathegories += countedProducts.differentProductsCount
+       return countedProducts
     })
+    return {cathegories: result, 
+        allCathegoriesSelector: {cathegoryName: allCathegoriesSelectorName, differentProductsCount: sumOfAllCathegories}} 
 }
-
+function getCathegoriesDataForDisplay(cathegories: arrayData, productsData: arrayData):storeDisplayCathegoriesData{
+    let cathegoriesDataCopy: arrayData[] = JSON.parse(JSON.stringify(cathegories));
+    const cathegoriesNames = cathegoriesDataCopy.map((cathegory:any)=>{
+        return cathegory.data.cathegory
+    })
+    return countProductsPerCathegory(cathegoriesNames, productsData)
+}
 export function getPriceRange(productsData: arrayData, cathegory: string | false = false):priceRange{
     let dataCopy = JSON.parse(JSON.stringify(productsData));
     const result = dataCopy.reduce((accumulator: priceRange, currVal: fetchedProductData, index: number, arrayData: arrayData)=>{

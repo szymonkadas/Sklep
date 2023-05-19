@@ -1,6 +1,7 @@
-import { ChangeEvent, FC, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, FC, useContext, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { StoreData } from '../../pages/store/StoreLayout';
 interface SearchbarProps{
-    productNames: string[];
+    productNames: string[],
     searchVal: string,
     setSearchVal: React.Dispatch<React.SetStateAction<string>>
 }
@@ -8,6 +9,10 @@ type searchProposal = JSX.Element
 
 const Searchbar: FC<SearchbarProps> = (props: SearchbarProps)=>{
     const [searchbarVal, setSearchbarVal] = useState(props.searchVal)
+    const cathegories = useContext(StoreData).cathegories.map((cathegory)=>{
+        return cathegory.cathegoryName
+    }).unshift(useContext(StoreData).allCathegoriesSelector.cathegoryName)
+    // console.log(cathegories)
     const [proposals, setProposals] = useState<searchProposal[]>([])
     const [searchingState, setSearchingState] = useState(false);
     const [searchbarIsFocused, setSearchbarIsFocused] = useState(false); 
