@@ -23,7 +23,6 @@ export async function createLoaderFunction(dataKeys: dataKeys[], localStorageKey
                 const entries = await Promise.all(
                     dataKeys.map(async (dataKey) => {
                         const value = await dataKey.fetcher();
-                        console.log(value)
                         return [dataKey.key, value];
                     })
                 );

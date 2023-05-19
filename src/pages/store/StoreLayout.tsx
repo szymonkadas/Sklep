@@ -82,19 +82,21 @@ try{
 export function filterProducts(data: arrayData , searchVal?: string, cathegory?: string, priceRange?: priceRange){
     let result = JSON.parse(JSON.stringify(data));
     if(searchVal !== undefined){
-        result = result.filter((product:productData) => product.name.toLowerCase().includes(searchVal))
+        result = result.filter((product:fetchedProductData) => {
+            return product.data.name.toLowerCase().includes(searchVal)
+        })
     }if(cathegory !== undefined && cathegory.length > 0){
-        result = result.filter((product:productData) => product.cathegory === cathegory)
+        result = result.filter((product:fetchedProductData) => product.data.cathegory === cathegory)
     }if(priceRange !== undefined){
-        result = result.filter((product:productData) => {
-            if(product.discount && product.discount_price){
-                if(product.discount_price >= priceRange.minPrice 
-                && product.discount_price <= priceRange.maxPrice){
+        result = result.filter((product:fetchedProductData) => {
+            if(product.data.discount && product.data.discount_price){
+                if(product.data.discount_price >= priceRange.minPrice 
+                && product.data.discount_price <= priceRange.maxPrice){
                     return product
                 }
-            }else if(product.price){
-                if(product.price >= priceRange.minPrice 
-                && product.price <= priceRange.maxPrice){
+            }else if(product.data.price){
+                if(product.data.price >= priceRange.minPrice 
+                && product.data.price <= priceRange.maxPrice){
                     return product
                 }
             }

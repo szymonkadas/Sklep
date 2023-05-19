@@ -1,5 +1,4 @@
 import { useContext, useMemo } from "react"
-import { productData } from "../../api"
 import CathegoriesFilter from "../../components/Store/CathegoriesFilter"
 import PriceSetter, { priceRange } from "../../components/Store/PriceSetter"
 import Searchbar from "../../components/Store/Searchbar"
@@ -16,7 +15,6 @@ export type storeAsideProps = {
 }
 //product namesy tutaj liczyć.
 const StoreAside = function(props:storeAsideProps){
-    // const productNames = useMemo(()=>createProductNames(props.filteredProducts), [props.filteredProducts, props.searchVal, props.currentCathegory])
     const products = useContext(StoreData).products;
     const searchbarFilteredNames = useMemo(()=>createProductNames(filterProducts(products, undefined, props.currentCathegory, props.usersPriceRange )), [props.filteredProducts, props.searchVal])
     const filteredCathegoriesProductMap = new Map<string, number>();
@@ -25,7 +23,7 @@ const StoreAside = function(props:storeAsideProps){
             filteredCathegoriesProductMap.set(
                 product.data.cathegory, 
                 filteredCathegoriesProductMap.get(product.data.cathegory)! + 1
-                // ! so typescript believes me that it is indeed not undefined.
+                // using ! so typescript believes me that it is indeed not undefined.
             );
         }else{
             filteredCathegoriesProductMap.set(product.data.cathegory, 1)
@@ -42,8 +40,8 @@ const StoreAside = function(props:storeAsideProps){
 
 }
 function createProductNames(data: any){
-    return data.map((product:productData) => {
-        return product.name 
+    return data.map((product:fetchedProductData) => {
+        return product.data.name 
     })
 }
 
