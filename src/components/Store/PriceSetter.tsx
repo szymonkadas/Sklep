@@ -10,6 +10,7 @@ export type priceRange = {
     minPrice: number;
 }
 //There's one currency meant to be, so i'll just give it hard coded pln
+// This component lets user filter products by price, using 2 inputs and slider (these are connected).
 const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps)=>{
     const clearFilters = useContext(StoreData).clearFiltersStatus
     const [min, setMin] = useState("");
@@ -30,6 +31,7 @@ const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps)=>{
     
     const pricePattern = /^\d{0,5}([.,]\d+)?$/; //only values in range <0; maxInputPrice> and "";
     const incorrectPriceRangeClass = priceRangeValidity ? "" : "store-aside__price-filter__input--incorrect";
+    
     const submitUsersPriceRange = ()=>{
         checkPriceRangeValidity(min, max)
         if(priceRangeValidity){
@@ -89,7 +91,7 @@ const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps)=>{
     const handleFinishedChanges = (event: ChangeEvent<HTMLInputElement>) => {
         checkPriceRangeValidity(min, max)
     }
-
+    // price slider params calculated by min, max, priceRangeOfCathegory variables
     const priceSlider = useMemo(()=>{
         let minimal = 0
         let presetMin: number = min ? parseFloat(min) : priceRangeOfCathegory.minPrice;
