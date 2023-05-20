@@ -1,7 +1,3 @@
-export default function Store(){
-
-    return(
-        <>
-        </>
-    )
+export default function Store() {
+  return <></>;
 }

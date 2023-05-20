@@ -1,4 +1,4 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode } from "react";
 
 interface IconTextBlockProps {
   iconPath: string;
@@ -6,7 +6,11 @@ interface IconTextBlockProps {
   children: ReactNode;
 }
 
-const IconTextBlock: FC<IconTextBlockProps> = ({ iconPath, title, children }) => {
+const IconTextBlock: FC<IconTextBlockProps> = ({
+  iconPath,
+  title,
+  children,
+}) => {
   const localStyle = {
     backgroundImage: `url(${iconPath})`,
   };

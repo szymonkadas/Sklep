@@ -2,10 +2,10 @@ import {
   Route,
   RouterProvider,
   createBrowserRouter,
-  createRoutesFromElements
+  createRoutesFromElements,
 } from "react-router-dom";
 import Layout from "./components/Layout";
-import './style/App.css';
+import "./style/App.css";
 // import Checkout from "./pages/Checkout";
 import Home, { homeLoader } from "./pages/Home";
 import Store from "./pages/store/Store";
@@ -14,11 +14,9 @@ import StoreLayout, { storeLoader } from "./pages/store/StoreLayout";
 import NotFound from ".//pages/NotFound";
 //   Link
 
-
-export const hasOwnNestedProperty = function(obj:any, propertyPath:string) {
-  if (!propertyPath)
-    return false;
-  var properties = propertyPath.split('.');
+export const hasOwnNestedProperty = function (obj: any, propertyPath: string) {
+  if (!propertyPath) return false;
+  var properties = propertyPath.split(".");
 
   for (var i = 0; i < properties.length; i++) {
     var prop = properties[i];
@@ -33,36 +31,30 @@ export const hasOwnNestedProperty = function(obj:any, propertyPath:string) {
 };
 
 function App() {
-  const router = createBrowserRouter(createRoutesFromElements(
-    <Route path="/" element={<Layout />} >
-      <Route index element={<Home />} loader={homeLoader}></Route>
-      <Route element={<StoreLayout />} loader={storeLoader}>
-        <Route path="/store" element={<Store />}></Route>
-        {/* <Route path="./" element={<StoreAside></StoreAside>}></Route> */}
-      </Route>
-      {/* Gotta use protected routes for account routes, remember about that. */}
-      {/* <Route path="/account" element={<Login />}></Route> */}
-      {/* <Route path="/product" element={<ProductLayout />}>
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} loader={homeLoader}></Route>
+        <Route element={<StoreLayout />} loader={storeLoader}>
+          <Route path="/store" element={<Store />}></Route>
+          {/* <Route path="./" element={<StoreAside></StoreAside>}></Route> */}
+        </Route>
+        {/* Gotta use protected routes for account routes, remember about that. */}
+        {/* <Route path="/account" element={<Login />}></Route> */}
+        {/* <Route path="/product" element={<ProductLayout />}>
         <Route path=":productName" element={<Product />}></Route>
       </Route> */}
-      {/* <Route path="/about" element={<About />}></Route> */}
-      {/* <Route path="/shopping_cart" element={<ShoppingCart />} />
+        {/* <Route path="/about" element={<About />}></Route> */}
+        {/* <Route path="/shopping_cart" element={<ShoppingCart />} />
       <Route path="/checkout" element={<Checkout />} /> */}
-      <Route path="*" element={<NotFound />} />
-    </Route>
-
-  ))
-  return (
-     <RouterProvider router={router} />
-  )
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    )
+  );
+  return <RouterProvider router={router} />;
 }
 
-export default App
-
-
-
-
-
+export default App;
 
 // import HostVans, { loader as hostVansLoader} from "./pages/Host/HostVans"
 // import HostVanDetail, { loader as hostVanDetailLoader } from "./pages/Host/HostVanDetail"
@@ -85,9 +77,9 @@ export default App
 //       errorElement={<Error />}
 //       loader={vansLoader}
 //     />
-//     <Route 
-//       path="vans/:id" 
-//       element={<VanDetail />} 
+//     <Route
+//       path="vans/:id"
+//       element={<VanDetail />}
 //       errorElement={<Error />}
 //       loader={vanDetailLoader}
 //     />
@@ -132,4 +124,3 @@ export default App
 //         />
 //       </Route>
 // ))
-
