@@ -39,6 +39,7 @@ try{
     useEffect(()=>{
         setClearFiltersStatus(false)
     }, [searchVal, currentCathegory, usersPriceRange])
+    
     const clearFilters = ()=>{
         setSearchVal("");
         setCurrentCathegory("");
@@ -86,7 +87,7 @@ export function filterProducts(data: arrayData , searchVal?: string, cathegory?:
     let result = JSON.parse(JSON.stringify(data));
     if(searchVal !== undefined){
         result = result.filter((product:fetchedProductData) => {
-            return product.data.name.toLowerCase().includes(searchVal)
+            return product.data.name.toLowerCase().includes(searchVal.toLowerCase().trim())
         })
     }if(cathegory !== undefined && cathegory.length > 0){
         result = result.filter((product:fetchedProductData) => product.data.cathegory === cathegory)

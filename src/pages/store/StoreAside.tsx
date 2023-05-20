@@ -1,8 +1,7 @@
-import { useContext, useMemo } from "react"
 import CathegoriesFilter from "../../components/Store/CathegoriesFilter"
 import PriceSetter, { priceRange } from "../../components/Store/PriceSetter"
 import Searchbar from "../../components/Store/Searchbar"
-import { StoreData, arrayData, fetchedProductData, filterProducts } from "./StoreLayout"
+import { arrayData, fetchedProductData } from "./StoreLayout"
 export type storeAsideProps = {
     searchVal: string,
     setSearchVal: React.Dispatch<React.SetStateAction<string>>
@@ -14,8 +13,6 @@ export type storeAsideProps = {
     clearFilters: () => void
 }
 const StoreAside = function(props:storeAsideProps){
-    const products = useContext(StoreData).products;
-    const searchbarFilteredNames = useMemo(()=>createProductNames(filterProducts(products, undefined, props.currentCathegory, props.usersPriceRange )), [props.filteredProducts, props.searchVal])
     const filteredCathegoriesProductMap = new Map<string, number>();
     props.filteredProducts.forEach((product: fetchedProductData) => {
         if(filteredCathegoriesProductMap.has(product.data.cathegory)){
@@ -32,17 +29,12 @@ const StoreAside = function(props:storeAsideProps){
     return(
         <aside className="store-aside">
             <button onClick={()=>props.clearFilters()}>Clear filters</button>     
-            <Searchbar productNames={searchbarFilteredNames} searchVal={props.searchVal} setSearchVal={props.setSearchVal}></Searchbar>
+            <Searchbar searchVal={props.searchVal} setSearchVal={props.setSearchVal} currentCathegory={props.currentCathegory} setCurrentCathegory={props.setCurrentCathegory} usersPriceRange={props.usersPriceRange}></Searchbar>
             <PriceSetter usersPriceRange={props.usersPriceRange} setUsersPriceRange={props.setUsersPriceRange} currentCathegory={props.currentCathegory}></PriceSetter>
             <CathegoriesFilter filteredCathegoriesProductMap={filteredCathegoriesProductMap} setCurrentCathegory={props.setCurrentCathegory}></CathegoriesFilter>   
         </aside>
     )
 
-}
-function createProductNames(data: any){
-    return data.map((product:fetchedProductData) => {
-        return product.data.name 
-    })
 }
 
 export default StoreAside;
