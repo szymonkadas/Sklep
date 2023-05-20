@@ -83,7 +83,8 @@ try{
 }
 }
 
-export function filterProducts(data: arrayData , searchVal?: string, cathegory?: string, priceRange?: priceRange){
+//filters an array of product data based on optional search value, cathegory, and price range arguments.
+export function filterProducts(data: arrayData , searchVal?: string, cathegory?: string, priceRange?: priceRange): arrayData{
     let result = JSON.parse(JSON.stringify(data));
     if(searchVal !== undefined){
         result = result.filter((product:fetchedProductData) => {
@@ -109,7 +110,10 @@ export function filterProducts(data: arrayData , searchVal?: string, cathegory?:
     return result;
 }
 
-function countProducts(data: arrayData, cathegoryName: string | false = false, searchVal: string = ""){
+//countProducts, with countProductsPerCathegory and getCathegoriesDataForDisplay 
+//work together to count the number of products in each category and return an object representing this data for display.
+// this one returns object containing cathegoryName and count of different (product can have quantity) products in this cathegory.
+function countProducts(data: arrayData, cathegoryName: string | false = false, searchVal: string = ""): storeDisplayCathegory{
     return data.reduce((accumulator: storeDisplayCathegory , currVal: fetchedProductData)=>{
         if(currVal.data.name.toLowerCase().includes(searchVal)){
             if(cathegoryName && currVal.data.cathegory.toLowerCase() === cathegoryName.toLowerCase() || !cathegoryName){
@@ -122,6 +126,7 @@ function countProducts(data: arrayData, cathegoryName: string | false = false, s
         return accumulator;
     }, {cathegoryName, differentProductsCount: 0})
 }
+// uses countProducts to return provided cathegories MAPPED, and additionally summary cathegory as sibling object
 function countProductsPerCathegory(cathegories: arrayData, productsData: arrayData):storeDisplayCathegoriesData{
     let sumOfAllCathegories = 0;
     const result: storeDisplayCathegory[] = cathegories.map((cathegoryName: string)=>{
@@ -132,6 +137,7 @@ function countProductsPerCathegory(cathegories: arrayData, productsData: arrayDa
     return {cathegories: result, 
         allCathegoriesSelector: {cathegoryName: allCathegoriesSelectorName, differentProductsCount: sumOfAllCathegories}} 
 }
+// takes in cathegories data, and merges its NAMES with product counts in productData.
 function getCathegoriesDataForDisplay(cathegories: arrayData, productsData: arrayData):storeDisplayCathegoriesData{
     let cathegoriesDataCopy: arrayData[] = JSON.parse(JSON.stringify(cathegories));
     const cathegoriesNames = cathegoriesDataCopy.map((cathegory:any)=>{
@@ -139,6 +145,8 @@ function getCathegoriesDataForDisplay(cathegories: arrayData, productsData: arra
     })
     return countProductsPerCathegory(cathegoriesNames, productsData)
 }
+
+// this function calculates and returns the minimum and maximum prices for a given array of product data, with an optional filter for a specific category.
 export function getPriceRange(productsData: arrayData, cathegory: string | false = false):priceRange{
     let dataCopy = JSON.parse(JSON.stringify(productsData));
     const result = dataCopy.reduce((accumulator: priceRange, currVal: fetchedProductData, index: number, arrayData: arrayData)=>{

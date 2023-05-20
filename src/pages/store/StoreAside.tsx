@@ -13,6 +13,7 @@ export type storeAsideProps = {
     clearFilters: () => void
 }
 const StoreAside = function(props:storeAsideProps){
+    // provides filtered cathegories with their unique product quantity.
     const filteredCathegoriesProductMap = new Map<string, number>();
     props.filteredProducts.forEach((product: fetchedProductData) => {
         if(filteredCathegoriesProductMap.has(product.data.cathegory)){

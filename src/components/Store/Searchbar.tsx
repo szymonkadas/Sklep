@@ -1,5 +1,5 @@
 import { ChangeEvent, FC, useContext, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { StoreData, fetchedProductData, filterProducts } from '../../pages/store/StoreLayout';
+import { StoreData, arrayData, fetchedProductData, filterProducts } from '../../pages/store/StoreLayout';
 import { priceRange } from './PriceSetter';
 interface SearchbarProps{
     searchVal: string,
@@ -8,9 +8,9 @@ interface SearchbarProps{
     setCurrentCathegory: React.Dispatch<React.SetStateAction<string>>,
     usersPriceRange: priceRange
 }
-type searchProposal = JSX.Element
 
 const Searchbar: FC<SearchbarProps> = (props: SearchbarProps)=>{
+    //State and memoVariables
     const clearFiltersStatus = useContext(StoreData).clearFiltersStatus
     const [searchbarVal, setSearchbarVal] = useState(props.searchVal)
     const [selectedCathegory, setSelectedCathegory] = useState(props.currentCathegory);
@@ -19,7 +19,9 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps)=>{
     const cathegoriesSelectElements: JSX.Element[] = useMemo(()=>cathegoriesContext.map((cathegory)=>
         <option value={cathegory}>{cathegory}</option>
     ), [])
-    const [proposals, setProposals] = useState<searchProposal[]>([])
+    // search proposals array of proposal elements.
+    const [proposals, setProposals] = useState<JSX.Element[]>([])
+    //indicates whether a search is happening
     const [searchingState, setSearchingState] = useState(false);
     const [searchbarIsFocused, setSearchbarIsFocused] = useState(false); 
     const [searchbarContainerIsHovered, setSearchbarContainerIsHovered] = useState(false);
@@ -33,6 +35,8 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps)=>{
     }, [searchbarContainerIsHovered, searchbarIsFocused]); 
     let changeTimeoutRef: React.MutableRefObject<NodeJS.Timeout | false> = useRef(false)
     const products = useContext(StoreData).products;
+
+    //updates the search proposals based on the provided search bar value and cathegory;
     const updateProposals = (sBvalue: string, cathegory: string) => {
         if(changeTimeoutRef.current) clearTimeout(changeTimeoutRef.current);
         if(sBvalue !== ""){
@@ -89,7 +93,7 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps)=>{
     const labelStyle:React.CSSProperties = {
         fontSize: "0px"
     }
-    
+    //It includes an input element for the search bar, a select dropdown for selecting a cathegory, a button for submitting, and a list for search proposals.
     return(
         <div className="store-aside__searchbar-layout"
             onMouseEnter={()=>setSearchbarContainerIsHovered(true)}
@@ -136,7 +140,7 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps)=>{
     )
 }
 
-function createProductNames(data: any){
+function createProductNames(data: arrayData){
     return data.map((product:fetchedProductData) => {
         return product.data.name 
     })
