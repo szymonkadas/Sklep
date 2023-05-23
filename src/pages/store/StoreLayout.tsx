@@ -17,8 +17,8 @@ import {
 import { storeDisplayCathegory } from "../../components/Store/CathegoriesFilter";
 import { priceRange } from "../../components/Store/PriceSetter";
 import { createLoaderFunction } from "../../utils/createLoaderFunction";
+import Store from "./Store";
 import { storeAsideProps } from "./StoreAside";
-// import StoreAside from "./StoreAside";
 const StoreAside = lazy(() => import("./StoreAside"));
 
 interface LoaderData {
@@ -62,6 +62,13 @@ const StoreLayout: FC = function () {
   try {
     const data = useLoaderData() as LoaderData;
     if (!data) throw "Błąd fetcha";
+    const products = useMemo(() => {
+      const productsMap = new Map<string, productData>();
+      data.products.collectionData.forEach((product: fetchedProductData) => {
+        productsMap.set(product.id, product.data);
+      });
+      return productsMap;
+    }, []);
     const [searchVal, setSearchVal] = useState("");
     const [currentCathegory, setCurrentCathegory] = useState("");
     const [usersPriceRange, setUsersPriceRange] = useState(
@@ -123,7 +130,9 @@ const StoreLayout: FC = function () {
             <StoreAside {...StoreAsideProps}></StoreAside>
           </StoreData.Provider>
         </Suspense>
-        <Outlet context={filteredProducts} />
+        <Store filteredProducts={filteredProducts}>
+          <Outlet context={products} />
+        </Store>
       </>
     );
   } catch (error) {

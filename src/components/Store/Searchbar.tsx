@@ -1,18 +1,18 @@
 import {
-    ChangeEvent,
-    FC,
-    useContext,
-    useDeferredValue,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
+  ChangeEvent,
+  FC,
+  useContext,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import {
-    StoreData,
-    arrayData,
-    fetchedProductData,
-    filterProducts,
+  StoreData,
+  arrayData,
+  fetchedProductData,
+  filterProducts,
 } from "../../pages/store/StoreLayout";
 import { priceRange } from "./PriceSetter";
 interface SearchbarProps {
@@ -41,7 +41,9 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps) => {
   const cathegoriesSelectElements: JSX.Element[] = useMemo(
     () =>
       cathegoriesContext.map((cathegory) => (
-        <option value={cathegory}>{cathegory}</option>
+        <option key={`searchbar-select-${cathegory}`} value={cathegory}>
+          {cathegory}
+        </option>
       )),
     []
   );
@@ -75,7 +77,10 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps) => {
           (productName: string, index: number) => {
             return (
               index < 3 && (
-                <li className="store-aside__searchbar-proposals__list__item">
+                <li
+                  key={`product-proposal-${productName}${index}`}
+                  className="store-aside__searchbar-proposals__list__item"
+                >
                   {productName}
                 </li>
               )

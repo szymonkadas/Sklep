@@ -8,11 +8,11 @@ import Layout from "./components/Layout";
 import "./style/App.css";
 // import Checkout from "./pages/Checkout";
 import Home, { homeLoader } from "./pages/Home";
-import Store from "./pages/store/Store";
 import StoreLayout, { storeLoader } from "./pages/store/StoreLayout";
 // import ShoppingCart from "./pages/ShoppingCart";
 import NotFound from ".//pages/NotFound";
 //   Link
+import ProductPage from "./components/Store/ProductPage";
 
 export const hasOwnNestedProperty = function (obj: any, propertyPath: string) {
   if (!propertyPath) return false;
@@ -35,9 +35,13 @@ function App() {
     createRoutesFromElements(
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} loader={homeLoader}></Route>
-        <Route element={<StoreLayout />} loader={storeLoader}>
-          <Route path="/store" element={<Store />}></Route>
+        <Route element={<StoreLayout />} path="/store" loader={storeLoader}>
+          {/* <Route index element={<Store />}></Route> */}
           {/* <Route path="./" element={<StoreAside></StoreAside>}></Route> */}
+          <Route
+            path=":productId"
+            element={<ProductPage></ProductPage>}
+          ></Route>
         </Route>
         {/* Gotta use protected routes for account routes, remember about that. */}
         {/* <Route path="/account" element={<Login />}></Route> */}

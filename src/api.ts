@@ -188,6 +188,30 @@ const productsRef = collection(db, "/store");
 
 export const getProductsData = await createFetchCollection(productsRef)
 
+export const getProductRating = async (ratingPath: string = "/ratings/0") =>{
+  const ratingRef = doc(db, ratingPath)
+  try{
+    const querySnapshot = await getDoc(ratingRef)
+    let data = querySnapshot.data()
+    if(!data) data = {
+      description: "",
+      rating: 0
+    } 
+    return {
+      data,
+      id: querySnapshot.id
+    }
+  }catch(error){
+    console.error(error)
+    return{
+      data: {
+        description: "",
+        rating: 0
+      }, id: "0"
+    }
+  }
+} 
+
 export interface productData{
   count: number,
   currency: string,
