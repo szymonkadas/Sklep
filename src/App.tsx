@@ -12,7 +12,7 @@ import StoreLayout, { storeLoader } from "./pages/store/StoreLayout";
 // import ShoppingCart from "./pages/ShoppingCart";
 import NotFound from ".//pages/NotFound";
 //   Link
-import ProductPage from "./components/Store/ProductPage";
+import ProductPage from "./pages/store/ProductPage";
 
 export const hasOwnNestedProperty = function (obj: any, propertyPath: string) {
   if (!propertyPath) return false;

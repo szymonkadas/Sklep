@@ -11,7 +11,7 @@ const ProductTile: FC<ProductProps> = (props) => {
   return (
     <div className={`${props.classNamePrefix}__product`}>
       {/* ::before'a zrobić przed nim jeśli będzie discount. */}
-      <NavLink to={props.id}>
+      <NavLink to={`/store/${props.id}`}>
         <img
           src={`/src/assets/${props.photo}`}
           alt={`${props.name}-image`}
@@ -21,37 +21,47 @@ const ProductTile: FC<ProductProps> = (props) => {
           width="200px"
         ></img>
       </NavLink>
-      <div className={`${props.classNamePrefix}__product__data`}>
-        <h6 className={`${props.classNamePrefix}__product__data__name`}>
+      <div className={`product__data ${props.classNamePrefix}__product__data`}>
+        <h6
+          className={`product__data__name ${props.classNamePrefix}__product__data__name`}
+        >
           {props.name}
         </h6>
         <p className={`${props.classNamePrefix}__product__data__cathegory`}>
           {props.cathegory}
         </p>
-        <p className={`${props.classNamePrefix}__product__data__price`}>
+        <p
+          className={`product__data__price ${props.classNamePrefix}__product__data__price`}
+        >
+          <span
+            className={`product__data__price__regular${
+              props.discount && "--inactive"
+            }${props.classNamePrefix}__product__data__price__regular${
+              props.discount && "--inactive"
+            }`}
+          >
+            {props.price}
+            &nbsp;
+            <span
+              className={`product__data__currency ${props.classNamePrefix}__product__data__price__currency`}
+            >
+              {currency}
+            </span>
+          </span>
           {props.discount && (
             <span
-              className={`${props.classNamePrefix}__product__data__price__discount`}
+              className={`product__data__price__discount ${props.classNamePrefix}__product__data__price__discount`}
             >
               {props.discount_price}
               &nbsp;
               <span
-                className={`${props.classNamePrefix}__product__data__price__currency`}
+                className={`product__data__price__currency ${props.classNamePrefix}__product__data__price__currency`}
               >
                 {currency}
               </span>
               &nbsp;
             </span>
           )}
-          <span className={`${props.classNamePrefix}__product__data__price`}>
-            {props.price}
-            &nbsp;
-            <span
-              className={`${props.classNamePrefix}__product__data__price__currency`}
-            >
-              {currency}
-            </span>
-          </span>
         </p>
         <ProductRating
           classNamePrefix={`${props.classNamePrefix}__product__data`}

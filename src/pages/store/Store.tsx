@@ -23,8 +23,6 @@ const Store: FC<PropsWithChildren<StoreProps>> = (props) => {
     });
     setProducts(data);
   }, [props.filteredProducts]);
-  // const productsDisplay = useDeferredValue(products)
-  // console.log(props.children);
   const content = productId ? (
     <>{props.children}</>
   ) : (
