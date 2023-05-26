@@ -12,9 +12,10 @@ import { arrayData, fetchedProductData } from "./StoreLayout";
 // PROBLEM: PRZY KLIKANIU PRZEZ NAVBAR NIE USTAWIA PARAMETRÓW! ORAZ: JAK JEST STORE NIE USTAWIA /ALL!
 const Store: FC<PropsWithChildren> = (props) => {
   const { currentCathegory } = getRouteParams(useParams(), ["currentCathegory"], [""]);
+  const redirection = useNavigate();
   useEffect(() => {
     if (currentCathegory === "") {
-      useNavigate()(`/store/all?${useSearchParams()[0]}`);
+      redirection(`/store/all?${useSearchParams()[0]}`);
     }
   }, []);
   const { productId } = useParams();
@@ -35,7 +36,7 @@ const Store: FC<PropsWithChildren> = (props) => {
     const data = filteredProducts.map((product: fetchedProductData) => {
       return (
         <ProductTile
-          key={`product-${product.id}`}
+          key={`product-tile-${product.id}`}
           classNamePrefix="store"
           {...product.data}
           id={product.id}
@@ -47,7 +48,7 @@ const Store: FC<PropsWithChildren> = (props) => {
   const content = productId ? (
     <Outlet context={{ productsMap, filteredProductsMap }}></Outlet>
   ) : (
-    <section className="store">{products}</section>
+    <section className="store">{...products}</section>
   );
   return content;
 };

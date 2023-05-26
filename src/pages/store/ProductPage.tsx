@@ -28,9 +28,9 @@ const ProductPage: FC = () => {
   // Jeśli nie ma takiego produktu no to wracamy do sklepu.
   const redirection = useNavigate();
   useEffect(() => {
-    if (!product) {
+    if (!product && productsMap.size > 0) {
       redirection(`/store/${currentCathegory}?${searchParams}`);
-    } else {
+    } else if (product) {
       getRatingData(product.rating).then((data) => setRatingData(data));
     }
   }, []);

@@ -81,7 +81,7 @@ const StoreLayout: FC = function () {
     // for store products context
     const productsMap = useMemo(() => {
       const productsMap = new Map<string, productData>();
-      filteredProducts.forEach((product: fetchedProductData) => {
+      data.products.collectionData.forEach((product: fetchedProductData) => {
         productsMap.set(product.id, product.data);
       });
       return productsMap;
