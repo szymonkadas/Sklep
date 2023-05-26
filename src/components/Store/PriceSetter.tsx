@@ -1,30 +1,24 @@
-import {
-  ChangeEvent,
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import {
-  StoreData,
-  filterProducts,
-  getPriceRange,
-} from "../../pages/store/StoreLayout";
-interface SearchbarProps {
-  usersPriceRange: priceRange;
-  setUsersPriceRange: React.Dispatch<React.SetStateAction<priceRange>>;
-  currentCathegory: string;
-}
+import { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import { StoreData, allCathegoriesSelectorName, filterProducts, getPriceRange } from "../../pages/store/StoreLayout";
+import { changeSearchParams } from "../../utils/changeSearchParams";
+import getRouteParam from "../../utils/getRouteParams";
+import getSearchParams from "../../utils/getSearchParams";
+
 export type priceRange = {
   maxPrice: number;
   minPrice: number;
 };
 //There's one currency meant to be, so i'll just give it hard coded pln
 // This component lets user filter products by price, using 2 inputs and slider (these are connected).
-const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps) => {
-  const clearFilters = useContext(StoreData).clearFiltersStatus;
+const PriceSetter: FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { usersMaxPrice, usersMinPrice } = getSearchParams(searchParams, ["usersMaxPrice", "usersMinPrice"]);
+  const usersPriceRange: priceRange = {
+    maxPrice: parseFloat(usersMaxPrice),
+    minPrice: parseFloat(usersMinPrice),
+  };
+  const { currentCathegory } = getRouteParam(useParams(), ["currentCathegory"], [allCathegoriesSelectorName]);
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
   const [userHasSetMaxPrice, setUserHasSetMaxPrice] = useState(false);
@@ -33,24 +27,12 @@ const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps) => {
   const products = useContext(StoreData).products;
   const maxPrice = useMemo(() => getPriceRange(products).maxPrice, []);
   const priceRangeOfCathegory = useMemo(
-    () =>
-      getPriceRange(
-        filterProducts(products, undefined, props.currentCathegory)
-      ),
-    [props.currentCathegory]
+    () => getPriceRange(filterProducts(products, undefined, currentCathegory)),
+    [currentCathegory]
   );
 
-  useEffect(() => {
-    if (clearFilters) {
-      setMin("");
-      setMax("");
-    }
-  }, [props.usersPriceRange]);
-
   const pricePattern = /^\d{0,5}([.,]\d+)?$/; //only values in range <0; maxInputPrice> and "";
-  const incorrectPriceRangeClass = priceRangeValidity
-    ? ""
-    : "store-aside__price-filter__input--incorrect";
+  const incorrectPriceRangeClass = priceRangeValidity ? "" : "store-aside__price-filter__input--incorrect";
 
   const submitUsersPriceRange = () => {
     checkPriceRangeValidity(min, max);
@@ -70,7 +52,8 @@ const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps) => {
         maximal = priceRangeOfCathegory.maxPrice;
         if (userHasSetMaxPrice) setUserHasSetMaxPrice(false);
       }
-      props.setUsersPriceRange({ minPrice: minimal, maxPrice: maximal });
+      changeSearchParams(searchParams, ["usersMaxPrice", "usersMinPrice"], [maximal.toFixed(2), minimal.toFixed(2)]);
+      setSearchParams(searchParams);
     }
     return;
   };
@@ -114,14 +97,9 @@ const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps) => {
   // price slider params calculated by min, max, priceRangeOfCathegory variables
   const priceSlider = useMemo(() => {
     let minimal = 0;
-    let presetMin: number = min
-      ? parseFloat(min)
-      : priceRangeOfCathegory.minPrice;
+    let presetMin: number = min ? parseFloat(min) : priceRangeOfCathegory.minPrice;
     let maximal = Math.ceil(maxPrice);
-    let presetMax: number =
-      max && parseFloat(max) < maximal
-        ? parseFloat(max)
-        : priceRangeOfCathegory.maxPrice;
+    let presetMax: number = max && parseFloat(max) < maximal ? parseFloat(max) : priceRangeOfCathegory.maxPrice;
     return {
       minimal: minimal,
       presetMin: presetMin,
@@ -133,20 +111,14 @@ const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps) => {
   const handleSliderChange = (event: any) => {
     // had to use inner function cuz couldn't assign such type to event argument ehu.
     function properHandler(event: simpleRangeEvent) {
-      checkPriceRangeValidity(
-        event.detail.minRangeValue.toFixed(2),
-        event.detail.maxRangeValue.toFixed(2)
-      );
+      checkPriceRangeValidity(event.detail.minRangeValue.toFixed(2), event.detail.maxRangeValue.toFixed(2));
     }
     properHandler(event);
   };
   const priceLabelStyle: React.CSSProperties = {
     fontSize: "0px",
   };
-  useEffect(
-    () => window.addEventListener("slider-price-change", handleSliderChange),
-    []
-  );
+  useEffect(() => window.addEventListener("slider-price-change", handleSliderChange), []);
   return (
     <div className="store-aside__price-filter-layout">
       <h4>Filter by price</h4>
@@ -179,10 +151,7 @@ const PriceSetter: FC<SearchbarProps> = (props: SearchbarProps) => {
           onBlur={(event) => handleFinishedChanges(event)}
           placeholder={priceRangeOfCathegory.maxPrice.toFixed(2)}
         ></input>
-        <button
-          className="store-aside__price-filter__interface-button"
-          onClick={() => submitUsersPriceRange()}
-        >
+        <button className="store-aside__price-filter__interface-button" onClick={() => submitUsersPriceRange()}>
           Search
         </button>
       </div>

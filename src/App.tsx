@@ -1,10 +1,5 @@
-import {
-  Route,
-  RouterProvider,
-  createBrowserRouter,
-  createRoutesFromElements,
-} from "react-router-dom";
-import Layout from "./components/Layout";
+import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
+import Layout, { headerLoader } from "./components/Layout";
 import "./style/App.css";
 // import Checkout from "./pages/Checkout";
 import Home, { homeLoader } from "./pages/Home";
@@ -13,7 +8,7 @@ import StoreLayout, { storeLoader } from "./pages/store/StoreLayout";
 import NotFound from ".//pages/NotFound";
 //   Link
 import ProductPage from "./pages/store/ProductPage";
-
+import Store from "./pages/store/Store";
 export const hasOwnNestedProperty = function (obj: any, propertyPath: string) {
   if (!propertyPath) return false;
   var properties = propertyPath.split(".");
@@ -33,15 +28,12 @@ export const hasOwnNestedProperty = function (obj: any, propertyPath: string) {
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
-      <Route path="/" element={<Layout />}>
+      <Route path="/" element={<Layout />} loader={headerLoader}>
         <Route index element={<Home />} loader={homeLoader}></Route>
         <Route element={<StoreLayout />} path="/store" loader={storeLoader}>
-          {/* <Route index element={<Store />}></Route> */}
-          {/* <Route path="./" element={<StoreAside></StoreAside>}></Route> */}
-          <Route
-            path=":productId"
-            element={<ProductPage></ProductPage>}
-          ></Route>
+          <Route path=":currentCathegory" element={<Store></Store>}>
+            <Route path=":productId" element={<ProductPage></ProductPage>}></Route>
+          </Route>
         </Route>
         {/* Gotta use protected routes for account routes, remember about that. */}
         {/* <Route path="/account" element={<Login />}></Route> */}

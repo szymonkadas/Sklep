@@ -1,6 +1,8 @@
 import { FC } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams, useSearchParams } from "react-router-dom";
 import { productData } from "../../api";
+import { allCathegoriesSelectorName } from "../../pages/store/StoreLayout";
+import getRouteParams from "../../utils/getRouteParams";
 import ProductRating from "./ProductRating";
 interface ProductProps extends productData {
   classNamePrefix: string;
@@ -8,10 +10,12 @@ interface ProductProps extends productData {
 }
 const ProductTile: FC<ProductProps> = (props) => {
   const currency: string = currencyConverter(props.currency);
+  const { currentCathegory } = getRouteParams(useParams(), ["currentCathegory"], [allCathegoriesSelectorName]);
+  const [searchParams, setSearchParams] = useSearchParams();
   return (
     <div className={`${props.classNamePrefix}__product`}>
       {/* ::before'a zrobić przed nim jeśli będzie discount. */}
-      <NavLink to={`/store/${props.id}`}>
+      <NavLink to={`/store/${currentCathegory}/${props.id}?${searchParams}`}>
         <img
           src={`/src/assets/${props.photo}`}
           alt={`${props.name}-image`}
@@ -22,36 +26,27 @@ const ProductTile: FC<ProductProps> = (props) => {
         ></img>
       </NavLink>
       <div className={`product__data ${props.classNamePrefix}__product__data`}>
-        <h6
-          className={`product__data__name ${props.classNamePrefix}__product__data__name`}
+        <NavLink
+          to={`/store/${currentCathegory}/${props.id}?${searchParams}`}
+          className={`product__data__name ${props.classNamePrefix}__product__data__name--navlink`}
         >
-          {props.name}
-        </h6>
-        <p className={`${props.classNamePrefix}__product__data__cathegory`}>
-          {props.cathegory}
-        </p>
-        <p
-          className={`product__data__price ${props.classNamePrefix}__product__data__price`}
-        >
+          <h6 className={`product__data__name ${props.classNamePrefix}__product__data__name`}>{props.name}</h6>
+        </NavLink>
+        <p className={`${props.classNamePrefix}__product__data__cathegory`}>{props.cathegory}</p>
+        <p className={`product__data__price ${props.classNamePrefix}__product__data__price`}>
           <span
-            className={`product__data__price__regular${
-              props.discount && "--inactive"
-            }${props.classNamePrefix}__product__data__price__regular${
-              props.discount && "--inactive"
-            }`}
+            className={`product__data__price__regular${props.discount && "--inactive"}${
+              props.classNamePrefix
+            }__product__data__price__regular${props.discount && "--inactive"}`}
           >
             {props.price}
             &nbsp;
-            <span
-              className={`product__data__currency ${props.classNamePrefix}__product__data__price__currency`}
-            >
+            <span className={`product__data__currency ${props.classNamePrefix}__product__data__price__currency`}>
               {currency}
             </span>
           </span>
           {props.discount && (
-            <span
-              className={`product__data__price__discount ${props.classNamePrefix}__product__data__price__discount`}
-            >
+            <span className={`product__data__price__discount ${props.classNamePrefix}__product__data__price__discount`}>
               {props.discount_price}
               &nbsp;
               <span

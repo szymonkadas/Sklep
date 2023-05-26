@@ -1,23 +1,13 @@
-import {
-  FC,
-  Suspense,
-  createContext,
-  lazy,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { Outlet, useLoaderData } from "react-router";
-import {
-  CollectionData,
-  getCathegoriesData,
-  getProductsData,
-  productData,
-} from "../../api";
+import { FC, Suspense, createContext, lazy, useEffect, useMemo, useState } from "react";
+import { Outlet, useLoaderData, useNavigate, useParams } from "react-router";
+import { useSearchParams } from "react-router-dom";
+import { CollectionData, getCathegoriesData, getProductsData, productData } from "../../api";
 import { storeDisplayCathegory } from "../../components/Store/CathegoriesFilter";
 import { priceRange } from "../../components/Store/PriceSetter";
+import { changeSearchParams } from "../../utils/changeSearchParams";
 import { createLoaderFunction } from "../../utils/createLoaderFunction";
-import Store from "./Store";
+import getRouteParam from "../../utils/getRouteParams";
+import getSearchParams from "../../utils/getSearchParams";
 import { storeAsideProps } from "./StoreAside";
 const StoreAside = lazy(() => import("./StoreAside"));
 
@@ -33,7 +23,6 @@ type storeDisplayCathegoriesData = {
 };
 interface StoreData extends storeDisplayCathegoriesData {
   products: arrayData;
-  clearFiltersStatus: boolean;
 }
 
 export const storeLoader = await createLoaderFunction(
@@ -45,77 +34,80 @@ export const storeLoader = await createLoaderFunction(
 );
 
 // Later on it could be moved for language selection purposes, would have to translate cathegories in database on run.
-const allCathegoriesSelectorName = "all";
+export const allCathegoriesSelectorName = "all";
+
 export const StoreData = createContext<StoreData>({
   products: {},
-  cathegories: [
-    { cathegoryName: allCathegoriesSelectorName, differentProductsCount: 0 },
-  ],
+  cathegories: [{ cathegoryName: allCathegoriesSelectorName, differentProductsCount: 0 }],
   allCathegoriesSelector: {
     cathegoryName: allCathegoriesSelectorName,
     differentProductsCount: 0,
   },
-  clearFiltersStatus: false,
 });
 
 const StoreLayout: FC = function () {
   try {
     const data = useLoaderData() as LoaderData;
     if (!data) throw "Błąd fetcha";
-    const products = useMemo(() => {
+    // search and route params
+    const [searchParams, setSearchParams] = useSearchParams();
+    const { searchVal, usersMaxPrice, usersMinPrice } = getSearchParams(searchParams, [
+      "searchVal",
+      "usersMaxPrice",
+      "usersMinPrice",
+    ]);
+    const { currentCathegory } = getRouteParam(useParams(), ["currentCathegory"], [allCathegoriesSelectorName]);
+    // usersPriceRangeSetup
+    const defaultPriceRange: priceRange = getPriceRange(data.products.collectionData);
+    useEffect(() => {
+      changeSearchParams(
+        searchParams,
+        ["usersMaxPrice", "usersMinPrice"],
+        [defaultPriceRange.maxPrice.toFixed(2), defaultPriceRange.minPrice.toFixed(2)]
+      );
+      setSearchParams(searchParams);
+    }, []);
+    const usersPriceRange: priceRange = useMemo(() => {
+      return {
+        maxPrice: parseFloat(usersMaxPrice),
+        minPrice: parseFloat(usersMinPrice),
+      };
+    }, [usersMaxPrice, usersMinPrice]);
+
+    const filteredProducts: arrayData = useMemo(
+      () => filterProducts(data.products.collectionData, searchVal, currentCathegory, usersPriceRange),
+      [searchVal, currentCathegory, usersMaxPrice, usersMinPrice]
+    );
+    // for store products context
+    const productsMap = useMemo(() => {
       const productsMap = new Map<string, productData>();
-      data.products.collectionData.forEach((product: fetchedProductData) => {
+      filteredProducts.forEach((product: fetchedProductData) => {
         productsMap.set(product.id, product.data);
       });
       return productsMap;
     }, []);
-    const [searchVal, setSearchVal] = useState("");
-    const [currentCathegory, setCurrentCathegory] = useState("");
-    const [usersPriceRange, setUsersPriceRange] = useState(
-      getPriceRange(data.products.collectionData)
-    );
-    const filteredProducts: arrayData = useMemo(
-      () =>
-        filterProducts(
-          data.products.collectionData,
-          searchVal,
-          currentCathegory,
-          usersPriceRange
-        ),
-      [searchVal, currentCathegory, usersPriceRange]
-    );
     const cathegoriesData = useMemo(
-      () =>
-        getCathegoriesDataForDisplay(
-          data.cathegories.collectionData,
-          data.products.collectionData
-        ),
+      () => getCathegoriesDataForDisplay(data.cathegories.collectionData, data.products.collectionData),
       [searchVal]
     );
-    const [clearFiltersStatus, setClearFiltersStatus] = useState(false);
-    // essentially when anything is modified clearFilter is nullified.
-    useEffect(() => {
-      setClearFiltersStatus(false);
-    }, [searchVal, currentCathegory, usersPriceRange]);
-
+    // clear filters in store aside and in url. Clearing aside works by changing key of storeAside, so i don't have to lift all of this state up there, and keep it local.
+    const [storeAsideSwitch, setStoreAsideSwitch] = useState(true);
+    const clearCathegory = useNavigate();
     const clearFilters = () => {
-      setSearchVal("");
-      setCurrentCathegory("");
-      setUsersPriceRange(getPriceRange(data.products.collectionData));
-      setClearFiltersStatus(true);
+      changeSearchParams(
+        searchParams,
+        ["searchVal", "usersMinPrice", "usersMaxPrice"],
+        ["", defaultPriceRange.minPrice.toFixed(2), defaultPriceRange.maxPrice.toFixed(2)]
+      );
+      setSearchParams(searchParams);
+      clearCathegory(`/store/${allCathegoriesSelectorName}?${searchParams}`);
+      setStoreAsideSwitch((prev) => !prev);
     };
 
     const StoreAsideProps: storeAsideProps = {
-      searchVal,
-      setSearchVal,
-      currentCathegory,
-      setCurrentCathegory,
       filteredProducts,
-      usersPriceRange,
-      setUsersPriceRange,
       clearFilters,
     };
-
     return (
       <>
         <Suspense fallback={<div>Loading...</div>}>
@@ -124,22 +116,17 @@ const StoreLayout: FC = function () {
               products: data.products.collectionData,
               cathegories: cathegoriesData.cathegories,
               allCathegoriesSelector: cathegoriesData.allCathegoriesSelector,
-              clearFiltersStatus,
             }}
           >
-            <StoreAside {...StoreAsideProps}></StoreAside>
+            <StoreAside key={`store-aside--clear${storeAsideSwitch}`} {...StoreAsideProps}></StoreAside>
           </StoreData.Provider>
         </Suspense>
-        <Store filteredProducts={filteredProducts}>
-          <Outlet context={products} />
-        </Store>
+        <Outlet context={{ productsMap, filteredProducts }} />
       </>
     );
   } catch (error) {
     console.log(error);
-    return (
-      <div className="store-layout__error">Wystąpił błąd w połączeniu</div>
-    );
+    return <div className="store-layout__error">Wystąpił błąd w połączeniu</div>;
   }
 };
 
@@ -153,30 +140,20 @@ export function filterProducts(
   let result = JSON.parse(JSON.stringify(data));
   if (searchVal !== undefined) {
     result = result.filter((product: fetchedProductData) => {
-      return product.data.name
-        .toLowerCase()
-        .includes(searchVal.toLowerCase().trim());
+      return product.data.name.toLowerCase().includes(searchVal.toLowerCase().trim());
     });
   }
-  if (cathegory !== undefined && cathegory.length > 0) {
-    result = result.filter(
-      (product: fetchedProductData) => product.data.cathegory === cathegory
-    );
+  if (cathegory !== undefined && cathegory.length > 0 && cathegory !== allCathegoriesSelectorName) {
+    result = result.filter((product: fetchedProductData) => product.data.cathegory === cathegory);
   }
   if (priceRange !== undefined) {
     result = result.filter((product: fetchedProductData) => {
       if (product.data.discount && product.data.discount_price) {
-        if (
-          product.data.discount_price >= priceRange.minPrice &&
-          product.data.discount_price <= priceRange.maxPrice
-        ) {
+        if (product.data.discount_price >= priceRange.minPrice && product.data.discount_price <= priceRange.maxPrice) {
           return product;
         }
       } else if (product.data.price) {
-        if (
-          product.data.price >= priceRange.minPrice &&
-          product.data.price <= priceRange.maxPrice
-        ) {
+        if (product.data.price >= priceRange.minPrice && product.data.price <= priceRange.maxPrice) {
           return product;
         }
       }
@@ -196,12 +173,7 @@ function countProducts(
   return data.reduce(
     (accumulator: storeDisplayCathegory, currVal: fetchedProductData) => {
       if (currVal.data.name.toLowerCase().includes(searchVal)) {
-        if (
-          (cathegoryName &&
-            currVal.data.cathegory.toLowerCase() ===
-              cathegoryName.toLowerCase()) ||
-          !cathegoryName
-        ) {
+        if ((cathegoryName && currVal.data.cathegory.toLowerCase() === cathegoryName.toLowerCase()) || !cathegoryName) {
           return {
             ...accumulator,
             differentProductsCount: accumulator.differentProductsCount + 1,
@@ -214,18 +186,13 @@ function countProducts(
   );
 }
 // uses countProducts to return provided cathegories MAPPED, and additionally summary cathegory as sibling object
-function countProductsPerCathegory(
-  cathegories: arrayData,
-  productsData: arrayData
-): storeDisplayCathegoriesData {
+function countProductsPerCathegory(cathegories: arrayData, productsData: arrayData): storeDisplayCathegoriesData {
   let sumOfAllCathegories = 0;
-  const result: storeDisplayCathegory[] = cathegories.map(
-    (cathegoryName: string) => {
-      const countedProducts = countProducts(productsData, cathegoryName);
-      sumOfAllCathegories += countedProducts.differentProductsCount;
-      return countedProducts;
-    }
-  );
+  const result: storeDisplayCathegory[] = cathegories.map((cathegoryName: string) => {
+    const countedProducts = countProducts(productsData, cathegoryName);
+    sumOfAllCathegories += countedProducts.differentProductsCount;
+    return countedProducts;
+  });
   return {
     cathegories: result,
     allCathegoriesSelector: {
@@ -235,13 +202,8 @@ function countProductsPerCathegory(
   };
 }
 // takes in cathegories data, and merges its NAMES with product counts in productData.
-function getCathegoriesDataForDisplay(
-  cathegories: arrayData,
-  productsData: arrayData
-): storeDisplayCathegoriesData {
-  let cathegoriesDataCopy: arrayData[] = JSON.parse(
-    JSON.stringify(cathegories)
-  );
+function getCathegoriesDataForDisplay(cathegories: arrayData, productsData: arrayData): storeDisplayCathegoriesData {
+  let cathegoriesDataCopy: arrayData[] = JSON.parse(JSON.stringify(cathegories));
   const cathegoriesNames = cathegoriesDataCopy.map((cathegory: any) => {
     return cathegory.data.cathegory;
   });
@@ -249,37 +211,22 @@ function getCathegoriesDataForDisplay(
 }
 
 // this function calculates and returns the minimum and maximum prices for a given array of product data, with an optional filter for a specific category.
-export function getPriceRange(
-  productsData: arrayData,
-  cathegory: string | false = false
-): priceRange {
+export function getPriceRange(productsData: arrayData, cathegory: string | false = false): priceRange {
   let dataCopy = JSON.parse(JSON.stringify(productsData));
   const result = dataCopy.reduce(
     (accumulator: priceRange, currVal: fetchedProductData) => {
       if (cathegory && currVal.data.cathegory !== cathegory) return accumulator;
       if (currVal.data.discount && currVal.data.discount_price) {
-        if (accumulator.minPrice === null)
-          accumulator.minPrice = currVal.data.discount_price;
+        if (accumulator.minPrice === null) accumulator.minPrice = currVal.data.discount_price;
         const minPrice =
-          accumulator.minPrice > currVal.data.discount_price
-            ? currVal.data.discount_price
-            : accumulator.minPrice;
+          accumulator.minPrice > currVal.data.discount_price ? currVal.data.discount_price : accumulator.minPrice;
         const maxPrice =
-          accumulator.maxPrice < currVal.data.discount_price
-            ? currVal.data.discount_price
-            : accumulator.maxPrice;
+          accumulator.maxPrice < currVal.data.discount_price ? currVal.data.discount_price : accumulator.maxPrice;
         return { minPrice, maxPrice };
       } else if (currVal.data.price) {
-        if (accumulator.minPrice === null)
-          accumulator.minPrice = currVal.data.price;
-        const minPrice =
-          accumulator.minPrice > currVal.data.price
-            ? currVal.data.price
-            : accumulator.minPrice;
-        const maxPrice =
-          accumulator.maxPrice < currVal.data.price
-            ? currVal.data.price
-            : accumulator.maxPrice;
+        if (accumulator.minPrice === null) accumulator.minPrice = currVal.data.price;
+        const minPrice = accumulator.minPrice > currVal.data.price ? currVal.data.price : accumulator.minPrice;
+        const maxPrice = accumulator.maxPrice < currVal.data.price ? currVal.data.price : accumulator.maxPrice;
         return { minPrice, maxPrice };
       } else {
         if (accumulator.minPrice === null) accumulator.minPrice = 0;

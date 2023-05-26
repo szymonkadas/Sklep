@@ -1,42 +1,28 @@
-import {
-  ChangeEvent,
-  FC,
-  useContext,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  StoreData,
-  arrayData,
-  fetchedProductData,
-  filterProducts,
-} from "../../pages/store/StoreLayout";
+import { ChangeEvent, FC, useContext, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { StoreData, allCathegoriesSelectorName, filterProducts } from "../../pages/store/StoreLayout";
+import { changeSearchParams } from "../../utils/changeSearchParams";
+import createProductNames from "../../utils/createProductNames";
+import getRouteParam from "../../utils/getRouteParams";
+import getSearchParams from "../../utils/getSearchParams";
 import { priceRange } from "./PriceSetter";
-interface SearchbarProps {
-  searchVal: string;
-  setSearchVal: React.Dispatch<React.SetStateAction<string>>;
-  currentCathegory: string;
-  setCurrentCathegory: React.Dispatch<React.SetStateAction<string>>;
-  usersPriceRange: priceRange;
-}
 
-const Searchbar: FC<SearchbarProps> = (props: SearchbarProps) => {
+const Searchbar: FC = () => {
   //State and memoVariables
-  const clearFiltersStatus = useContext(StoreData).clearFiltersStatus;
-  const [searchbarVal, setSearchbarVal] = useState(props.searchVal);
-  const [selectedCathegory, setSelectedCathegory] = useState(
-    props.currentCathegory
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchVal, usersMaxPrice, usersMinPrice } = getSearchParams(searchParams, [
+    "searchVal",
+    "usersMaxPrice",
+    "usersMinPrice",
+  ]);
+  const usersPriceRange: priceRange = { maxPrice: parseFloat(usersMaxPrice), minPrice: parseFloat(usersMinPrice) };
+  const { currentCathegory } = getRouteParam(useParams(), ["currentCathegory"], [allCathegoriesSelectorName]);
+  const [searchbarVal, setSearchbarVal] = useState("");
+  const [selectedCathegory, setSelectedCathegory] = useState(currentCathegory);
+  const changeURLCathegory = useNavigate();
   //merged allCathegoriesSelector name with other cathegories names
-  const cathegoriesContext: string[] = [
-    useContext(StoreData).allCathegoriesSelector.cathegoryName,
-  ].concat(
-    useContext(StoreData).cathegories.map(
-      (cathegory) => cathegory.cathegoryName
-    )
+  const cathegoriesContext: string[] = [useContext(StoreData).allCathegoriesSelector.cathegoryName].concat(
+    useContext(StoreData).cathegories.map((cathegory) => cathegory.cathegoryName)
   );
   const cathegoriesSelectElements: JSX.Element[] = useMemo(
     () =>
@@ -52,16 +38,14 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps) => {
   //indicates whether a search is happening
   const [searchingState, setSearchingState] = useState(false);
   const [searchbarIsFocused, setSearchbarIsFocused] = useState(false);
-  const [searchbarContainerIsHovered, setSearchbarContainerIsHovered] =
-    useState(false);
+  const [searchbarContainerIsHovered, setSearchbarContainerIsHovered] = useState(false);
   const wasFocused: boolean = useDeferredValue(searchbarIsFocused);
   const proposalsVisibility: "--active" | "--inactive" = useMemo(() => {
     if (searchbarIsFocused) return "--active";
     else if (searchbarContainerIsHovered && wasFocused) return "--active";
     return "--inactive";
   }, [searchbarContainerIsHovered, searchbarIsFocused]);
-  let changeTimeoutRef: React.MutableRefObject<NodeJS.Timeout | false> =
-    useRef(false);
+  let changeTimeoutRef: React.MutableRefObject<NodeJS.Timeout | false> = useRef(false);
   const products = useContext(StoreData).products;
 
   //updates the search proposals based on the provided search bar value and cathegory;
@@ -70,23 +54,19 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps) => {
     if (sBvalue !== "") {
       setSearchingState(true);
       changeTimeoutRef.current = setTimeout(() => {
-        const filteredData = createProductNames(
-          filterProducts(products, sBvalue, cathegory, props.usersPriceRange)
-        );
-        const filteredProposals = filteredData.map(
-          (productName: string, index: number) => {
-            return (
-              index < 3 && (
-                <li
-                  key={`product-proposal-${productName}${index}`}
-                  className="store-aside__searchbar-proposals__list__item"
-                >
-                  {productName}
-                </li>
-              )
-            );
-          }
-        );
+        const filteredData = createProductNames(filterProducts(products, sBvalue, cathegory, usersPriceRange));
+        const filteredProposals = filteredData.map((productName: string, index: number) => {
+          return (
+            index < 3 && (
+              <li
+                key={`product-proposal-${productName}${index}`}
+                className="store-aside__searchbar-proposals__list__item"
+              >
+                {productName}
+              </li>
+            )
+          );
+        });
         setProposals(filteredProposals);
         setSearchingState(false);
       }, 1000);
@@ -107,26 +87,18 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps) => {
   };
 
   const submitSearchbar = () => {
-    props.setSearchVal(searchbarVal.trim().toLowerCase());
-    props.setCurrentCathegory(selectedCathegory);
+    changeSearchParams(searchParams, ["searchVal"], [searchbarVal.trim().toLowerCase()]);
+    setSearchParams(searchParams);
+    changeURLCathegory(`/store/${selectedCathegory}?${searchParams}`);
     setProposals([]);
   };
 
   // updating state when relative values get updated
   useEffect(() => {
-    if (clearFiltersStatus) {
-      setSearchbarVal("");
-      setSelectedCathegory("");
-      setProposals([]);
-    }
-  }, [props.searchVal, props.currentCathegory, props.usersPriceRange]);
-  useEffect(() => {
-    if (!clearFiltersStatus) {
-      setSelectedCathegory(props.currentCathegory);
-      setProposals([]);
-      updateProposals(searchbarVal, props.currentCathegory);
-    }
-  }, [props.currentCathegory]);
+    setSelectedCathegory(currentCathegory);
+    setProposals([]);
+    updateProposals(searchbarVal, currentCathegory);
+  }, [currentCathegory]);
 
   const labelStyle: React.CSSProperties = {
     fontSize: "0px",
@@ -178,21 +150,16 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps) => {
           {...proposals}
           {proposals.length > 0 ? (
             proposals.length > 3 && (
-              <li className="store-aside__searchbar-proposals__list__sub-item">
-                {proposals.length - 3} more products
-              </li>
+              <li className="store-aside__searchbar-proposals__list__sub-item">{proposals.length - 3} more products</li>
             )
-          ) : (!searchingState && searchbarVal.length > 0) ||
-            (!searchingState && props.searchVal.length > 0) ? (
+          ) : (!searchingState && searchbarVal.length > 0) || (!searchingState && searchVal.length > 0) ? (
             <li className="store-aside__searchbar-proposals__list__sub-item">
               Couldn't find products, try restarting filters
             </li>
           ) : (
             searchingState &&
             searchbarVal.length > 0 && (
-              <li className="store-aside__searchbar-proposals__list__sub-item">
-                Searching...
-              </li>
+              <li className="store-aside__searchbar-proposals__list__sub-item">Searching...</li>
             )
           )}
         </ul>
@@ -200,11 +167,5 @@ const Searchbar: FC<SearchbarProps> = (props: SearchbarProps) => {
     </div>
   );
 };
-
-function createProductNames(data: arrayData) {
-  return data.map((product: fetchedProductData) => {
-    return product.data.name;
-  });
-}
 
 export default Searchbar;

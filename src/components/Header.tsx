@@ -1,6 +1,22 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
+import { allCathegoriesSelectorName } from "../pages/store/StoreLayout";
 import "../style/components/css/Header.css";
-export default function Header() {
+
+type headerProps = {
+  cathegories: string[];
+};
+export default function Header(props: headerProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const storeNavLinks = props.cathegories.map((cathegory) => {
+    return (
+      <NavLink
+        to={`/store/${cathegory}?${searchParams}`}
+        className={({ isActive, isPending }) => (isPending ? "pending" : isActive ? "active" : "")}
+      >
+        {cathegory[0].toUpperCase() + cathegory.slice(1, cathegory.length).toLowerCase()}
+      </NavLink>
+    );
+  });
   return (
     <header className="header">
       <div className="header__logo">Logo</div>
@@ -8,61 +24,30 @@ export default function Header() {
         <ol className="nav__nav-links">
           <li className="nav-links__li">
             <NavLink
-              to="/"
-              className={({ isActive, isPending }) =>
-                isPending ? "pending" : isActive ? "active" : ""
-              }
+              to={`/?${searchParams}`}
+              className={({ isActive, isPending }) => (isPending ? "pending" : isActive ? "active" : "")}
             >
               Strona Główna{" "}
             </NavLink>
           </li>
           <li className="nav-links__li">
             <NavLink
-              to="/store"
-              className={({ isActive, isPending }) =>
-                isPending ? "pending" : isActive ? "active" : ""
-              }
+              to={`/store/${allCathegoriesSelectorName}?${searchParams}`}
+              className={({ isActive, isPending }) => (isPending ? "pending" : isActive ? "active" : "")}
             >
               {" "}
               Sklep{" "}
             </NavLink>
             <div className="nav-links__li__sub-cathegories-wrapper">
               <div className="nav-links__li__sub-cathegories">
-                <ol className="nav-links__li__sub-cathegories__listed-items">
-                  <NavLink
-                    to="/store/accesories"
-                    className={({ isActive, isPending }) =>
-                      isPending ? "pending" : isActive ? "active" : ""
-                    }
-                  >
-                    Akcesoria
-                  </NavLink>
-                  <NavLink
-                    to="/store/man"
-                    className={({ isActive, isPending }) =>
-                      isPending ? "pending" : isActive ? "active" : ""
-                    }
-                  >
-                    Dla niego
-                  </NavLink>
-                  <NavLink
-                    to="/store/woman"
-                    className={({ isActive, isPending }) =>
-                      isPending ? "pending" : isActive ? "active" : ""
-                    }
-                  >
-                    Dla niej
-                  </NavLink>
-                </ol>
+                <ol className="nav-links__li__sub-cathegories__listed-items">{...storeNavLinks}</ol>
               </div>
             </div>
           </li>
           <li className="nav-links__li">
             <NavLink
               to="/account"
-              className={({ isActive, isPending }) =>
-                isPending ? "pending" : isActive ? "active" : ""
-              }
+              className={({ isActive, isPending }) => (isPending ? "pending" : isActive ? "active" : "")}
             >
               Konto
             </NavLink>
@@ -70,9 +55,7 @@ export default function Header() {
           <li className="nav-links__li">
             <NavLink
               to="/about"
-              className={({ isActive, isPending }) =>
-                isPending ? "pending" : isActive ? "active" : ""
-              }
+              className={({ isActive, isPending }) => (isPending ? "pending" : isActive ? "active" : "")}
             >
               O nas
             </NavLink>
@@ -80,9 +63,7 @@ export default function Header() {
           <li className="nav-links__li">
             <NavLink
               to="/contact"
-              className={({ isActive, isPending }) =>
-                isPending ? "pending" : isActive ? "active" : ""
-              }
+              className={({ isActive, isPending }) => (isPending ? "pending" : isActive ? "active" : "")}
             >
               Kontakt
             </NavLink>
@@ -90,9 +71,7 @@ export default function Header() {
           <li className="nav-links__li">
             <NavLink
               to="/ShoppingCart"
-              className={({ isActive, isPending }) =>
-                isPending ? "pending" : isActive ? "active" : ""
-              }
+              className={({ isActive, isPending }) => (isPending ? "pending" : isActive ? "active" : "")}
             >
               {" "}
               600,92 <span className="currency">zł</span>
@@ -101,9 +80,7 @@ export default function Header() {
             <div className="nav-links__li__sub-cathegories-wrapper">
               <div className="nav-links__li__sub-cathegories">
                 {/* Zrób by był slider, gridem do ogarnięcia ig i max-heightem*/}
-                <ol className="nav-links__li__sub-cathegories__listed-items">
-                  {/* <li>PRODUCT COMPONENT</li> */}
-                </ol>
+                <ol className="nav-links__li__sub-cathegories__listed-items">{/* <li>PRODUCT COMPONENT</li> */}</ol>
                 <div className="nav-links__li__sub-cathegories__sum">
                   <b>Kwota:</b> 600,92 <span className="currency">zł</span>
                 </div>

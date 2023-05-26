@@ -1,15 +1,19 @@
 import { FC, useContext } from "react";
-import { StoreData } from "../../pages/store/StoreLayout";
+import { NavLink, useParams, useSearchParams } from "react-router-dom";
+import { StoreData, allCathegoriesSelectorName } from "../../pages/store/StoreLayout";
+import getRouteParams from "../../utils/getRouteParams";
+
 export interface storeDisplayCathegory {
   cathegoryName: string;
   differentProductsCount: number;
 }
 interface cathegoriesProps {
-  setCurrentCathegory: React.Dispatch<React.SetStateAction<string>>;
   filteredCathegoriesProductMap: Map<string, number>;
 }
 
 const CathegoriesFilter: FC<cathegoriesProps> = (props) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { currentCathegory } = getRouteParams(useParams(), ["currentCathegory"], [allCathegoriesSelectorName]);
   const allCathegoriesSelector = useContext(StoreData).allCathegoriesSelector;
   // tracks total number of filtered products, shaped while making cathegories.
   let filteredProductsSum = 0;
@@ -17,20 +21,22 @@ const CathegoriesFilter: FC<cathegoriesProps> = (props) => {
   const cathegories = useContext(StoreData).cathegories.map((cathegory) => {
     let filteredProductsCount = 0;
     if (props.filteredCathegoriesProductMap.has(cathegory.cathegoryName)) {
-      filteredProductsCount = props.filteredCathegoriesProductMap.get(
-        cathegory.cathegoryName
-      )!;
+      filteredProductsCount = props.filteredCathegoriesProductMap.get(cathegory.cathegoryName)!;
     }
     filteredProductsSum += filteredProductsCount;
+    const activeClass = currentCathegory === cathegory.cathegoryName ? "--active" : "--inactive";
     return (
       <li className="store-aside__cathegories-filter__listing">
-        <a
-          href="javascript:void(0);"
-          className="store-aside__cathegories-filter__listing__link"
-          onClick={() => props.setCurrentCathegory(cathegory.cathegoryName)}
+        <NavLink
+          to={`/store/${cathegory.cathegoryName}?${searchParams}`}
+          className={`store-aside__cathegories-filter__listing__link${activeClass}`}
+          // onClick={() => {
+          //   // changeSearchParams(searchParams, ["currentCathegory"], [`${cathegory.cathegoryName}`]);
+          //   // setSearchParams(`${searchParams}`);
+          // }}
         >
           {cathegory.cathegoryName}
-        </a>
+        </NavLink>
         <span className="store-aside__cathegories-filter__listing__products-count">
           (<b>{filteredProductsCount}</b>/{cathegory.differentProductsCount})
         </span>
@@ -43,16 +49,20 @@ const CathegoriesFilter: FC<cathegoriesProps> = (props) => {
       <h4>Browse by cathegories</h4>
       <ul className="store-aside__cathegories-filter__list">
         <li className="store-aside__cathegories-filter__listing">
-          <a
-            href="javascript:void(0);"
-            className="store-aside__cathegories-filter__listing__link"
-            onClick={() => props.setCurrentCathegory("")}
+          <NavLink
+            to={`/store/all?${searchParams}`}
+            className={`store-aside__cathegories-filter__listing__link${
+              currentCathegory === "" ? "--active" : "--inactive"
+            }`}
+            // onClick={() => {
+            //   changeSearchParams(searchParams, ["currentCathegory"], [""]);
+            //   setSearchParams(`${searchParams}`);
+            // }}
           >
             {allCathegoriesSelector.cathegoryName}
-          </a>
+          </NavLink>
           <span className="store-aside__cathegories-filter__listing__products-count">
-            (<b>{filteredProductsSum}</b>/
-            {allCathegoriesSelector.differentProductsCount})
+            (<b>{filteredProductsSum}</b>/{allCathegoriesSelector.differentProductsCount})
           </span>
         </li>
         {...cathegories}

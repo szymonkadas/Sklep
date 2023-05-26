@@ -1,15 +1,9 @@
 import CathegoriesFilter from "../../components/Store/CathegoriesFilter";
-import PriceSetter, { priceRange } from "../../components/Store/PriceSetter";
+import PriceSetter from "../../components/Store/PriceSetter";
 import Searchbar from "../../components/Store/Searchbar";
 import { arrayData, fetchedProductData } from "./StoreLayout";
 export type storeAsideProps = {
-  searchVal: string;
-  setSearchVal: React.Dispatch<React.SetStateAction<string>>;
-  currentCathegory: string;
-  setCurrentCathegory: React.Dispatch<React.SetStateAction<string>>;
   filteredProducts: arrayData;
-  usersPriceRange: priceRange;
-  setUsersPriceRange: React.Dispatch<React.SetStateAction<priceRange>>;
   clearFilters: () => void;
 };
 const StoreAside = function (props: storeAsideProps) {
@@ -30,22 +24,9 @@ const StoreAside = function (props: storeAsideProps) {
   return (
     <aside className="store-aside">
       <button onClick={() => props.clearFilters()}>Clear filters</button>
-      <Searchbar
-        searchVal={props.searchVal}
-        setSearchVal={props.setSearchVal}
-        currentCathegory={props.currentCathegory}
-        setCurrentCathegory={props.setCurrentCathegory}
-        usersPriceRange={props.usersPriceRange}
-      ></Searchbar>
-      <PriceSetter
-        usersPriceRange={props.usersPriceRange}
-        setUsersPriceRange={props.setUsersPriceRange}
-        currentCathegory={props.currentCathegory}
-      ></PriceSetter>
-      <CathegoriesFilter
-        filteredCathegoriesProductMap={filteredCathegoriesProductMap}
-        setCurrentCathegory={props.setCurrentCathegory}
-      ></CathegoriesFilter>
+      <Searchbar></Searchbar>
+      <PriceSetter></PriceSetter>
+      <CathegoriesFilter filteredCathegoriesProductMap={filteredCathegoriesProductMap}></CathegoriesFilter>
     </aside>
   );
 };

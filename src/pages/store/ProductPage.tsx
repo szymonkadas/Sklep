@@ -1,11 +1,12 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router";
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import { productData } from "../../api";
 import ProductRating, { getRatingData } from "../../components/Store/ProductRating";
 import ProductTile, { currencyConverter } from "../../components/Store/ProductTile";
-import { arrayData } from "./StoreLayout";
-
+import { createRadioInput } from "../../utils/createRadioInput";
+import getRouteParams from "../../utils/getRouteParams";
+import { allCathegoriesSelectorName, arrayData } from "./StoreLayout";
 const ProductPage: FC = () => {
   const [size, setSize] = useState("");
   const [additionalInfoCathegory, setAdditionalInfoCathegory] = useState("opis produktu");
@@ -13,14 +14,22 @@ const ProductPage: FC = () => {
     rating: 0,
     description: "This product doesn't have any opinions so far.",
   });
-  const productsMap: Map<string, productData> = useOutletContext();
-  const { productId } = useParams();
+  const { productsMap, filteredProductsMap } = useOutletContext() as {
+    productsMap: Map<string, productData>;
+    filteredProductsMap: Map<string, productData>;
+  };
+  const { currentCathegory, productId } = getRouteParams(
+    useParams(),
+    ["currentCathegory", "productId"],
+    [allCathegoriesSelectorName, ""]
+  );
+  const [searchParams, setSearchParam] = useSearchParams();
   const product = productId && productsMap.get(productId);
   // Jeśli nie ma takiego produktu no to wracamy do sklepu.
   const redirection = useNavigate();
   useEffect(() => {
     if (!product) {
-      redirection("/store");
+      redirection(`/store/${currentCathegory}?${searchParams}`);
     } else {
       getRatingData(product.rating).then((data) => setRatingData(data));
     }
@@ -51,11 +60,11 @@ const ProductPage: FC = () => {
         <></>;
     }
   }, [additionalInfoCathegory, ratingData]);
-  // i tak wiadomo że product jest zdefiniowany już na tym etapie po useEffect ale jest to potrzebne dla pierwszego "biegu"/ts.
+  //if is needed for first run (until useEffect runs) and ts.
   if (product) {
     const currency: string = currencyConverter(product.currency);
     const opinionCount = ratingData.rating ? "1" : "0";
-    const Proposals = createNeighbourProductTilesArray(productsMap, productId, 4);
+    const Proposals = createProposalsOfProductTiles(filteredProductsMap, productsMap, productId, 4);
     const path = useLocation()
       .pathname.split("/")
       .reduce(
@@ -70,7 +79,7 @@ const ProductPage: FC = () => {
             const result = [
               ...accum.result,
               <>
-                <NavLink to={cumulatedPath}>{part}</NavLink>/
+                <NavLink to={`${cumulatedPath}?${searchParams}`}>{part}</NavLink>/
               </>,
             ];
             return { cumulatedPath, result };
@@ -201,74 +210,52 @@ const ProductPage: FC = () => {
 
 export default ProductPage;
 
-//Funkcja do zrobienia arraya sąsiednich produktów z podanej ilości produktów z mapy.
-function createNeighbourProductTilesArray(
-  map: Map<string, productData>,
+function createProposalsOfProductTiles(
+  filteredMap: Map<string, productData>,
+  backupMap: Map<string, productData>,
   productId: string,
   times: number
 ): JSX.Element[] {
-  const id = parseInt(productId);
   const result = [];
-  for (let i = 1; i <= times; i++) {
-    if (map.has(`${id + i}`) && map.get(`${id + i}`)) {
-      const productData = map.get(`${id + i}`) as productData;
-      result.push(
-        <ProductTile
-          classNamePrefix="store__product-page--propsals"
-          {...productData}
-          id={`${parseInt(productId) + i}`}
-        ></ProductTile>
-      );
-    } else if (map.has(`${id + i - 4}`) && map.get(`${id + i - 4}`)) {
-      const productData = map.get(`${parseInt(productId) + i - 4}`) as productData;
-      result.push(
-        <ProductTile
-          classNamePrefix="store__product-page--propsals"
-          {...productData}
-          id={`${parseInt(productId) + i - 4}`}
-        ></ProductTile>
-      );
+  const pushed = new Set<string>(productId);
+  // first iterate through array from filteredMap (max times 3*times) to look for potential productData, then if it was not enough, iterate with the same idea through backupMap, if not so, THEN iterate through MAP for certainty.
+  loopThrough(filteredMap);
+  if (result.length < times) {
+    loopThrough(backupMap);
+  }
+  if (result.length < times) {
+    for (const [key, value] of backupMap.entries()) {
+      if (result.length < times) {
+        if (pushed.has(key)) continue;
+        pushed.add(key);
+        result.push(
+          <ProductTile classNamePrefix="store__product-page--propsals" {...value} id={`${parseInt(key)}`}></ProductTile>
+        );
+      } else {
+        break;
+      }
     }
   }
   return result;
-}
 
-function createRadioInput<t extends string | number>(
-  classNamePrefix: string,
-  option: t,
-  state: {
-    value: t;
-    action: React.Dispatch<React.SetStateAction<t>>;
-  },
-  count?: string
-): JSX.Element {
-  const sizeOptionStyle = {
-    display: "block",
-    height: "0",
-    width: "0",
-    opacity: "0",
-    padding: "0",
-    margin: "0",
-  };
-  return (
-    <li
-      key={`${classNamePrefix}--option${option}`}
-      onClick={() => state.action(option)}
-      className={`${classNamePrefix}--container`}
-    >
-      <label
-        htmlFor={`${classNamePrefix}--option${option}`}
-        className={`${classNamePrefix}--${state.value === option ? "active" : "inactive"}`}
-      >
-        {`${option}${count ? "(" + count + ")" : ""}`}
-      </label>
-      <input
-        type="radio"
-        style={{ ...sizeOptionStyle }}
-        id={`${classNamePrefix}--option${option}`}
-        value={state.value}
-        onClick={() => state.action(option)}
-      ></input>
-    </li>
-  );
+  // helper function
+  function loopThrough(targetMap: Map<string, productData>) {
+    const targetArray = Array.from(targetMap);
+    let i = 0;
+    while (result.length < times && i < 3 * times) {
+      i++;
+      let index = Math.floor(Math.random() * targetArray.length);
+      const productData = targetArray[index];
+      if (!pushed.has(productData[0])) {
+        pushed.add(productData[0]);
+        result.push(
+          <ProductTile
+            classNamePrefix="store__product-page--propsals"
+            {...productData[1]}
+            id={`${parseInt(productData[0])}`}
+          ></ProductTile>
+        );
+      }
+    }
+  }
 }
