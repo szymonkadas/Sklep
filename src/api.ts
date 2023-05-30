@@ -1,4 +1,3 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import {
@@ -13,14 +12,13 @@ import {
   getFirestore,
   setDoc
 } from "firebase/firestore/lite";
+import currency from "./utils/currency";
+import currencyUpperCase from "./utils/currencyUpperCase";
 
+const currencyApiKey = `${import.meta.env.VITE_CURRENCY_API_KEY}`
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDFXNIebzOMHMwjLXllW0odENh63DLFJjo",
+  apiKey: `${import.meta.env.VITE_FIREBASE_API_KEY}`,
   authDomain: "wordpress-store-1c240.firebaseapp.com",
   projectId: "wordpress-store-1c240",
   storageBucket: "wordpress-store-1c240.appspot.com",
@@ -214,7 +212,7 @@ export const getProductRating = async (ratingPath: string = "/ratings/0") =>{
 
 export interface productData{
   count: number,
-  currency: string,
+  currency: currency,
   discount: boolean,
   discount_price: number,
   home_page_display: boolean,
@@ -222,7 +220,7 @@ export interface productData{
   photo: string,
   price: number,
   rating: string,
-  cathegory: "man" | "woman" | "unisex" | "accessories"
+  cathegory: string,
 }
 export async function addStoreProduct(data: productData, id: string){
     try {
@@ -235,3 +233,114 @@ export async function addStoreProduct(data: productData, id: string){
     console.error("Error adding document: ", e);
   }
 }
+
+export type currencyRatios = {
+  meta: {last_updated_at: string },
+  data: {[key in currencyUpperCase]: {
+    code: currencyUpperCase,
+    value: number
+  }}
+}
+type currencyParams = {
+  [key: string]: string
+}
+class CurrencyAPI {
+    baseUrl = 'https://api.currencyapi.com/v3/';
+
+    headers
+    constructor(apiKey = '') {
+        this.headers = {
+            apikey: apiKey
+        };
+    }
+
+    call (endpoint: any, params = {}) {
+        const paramString = new URLSearchParams({
+            ...params
+        }).toString();
+
+        return fetch(`${this.baseUrl}${endpoint}?${paramString}`, { headers: this.headers })
+            .then(response => response.json())
+            .then(data => {
+                return data;
+            });
+    }
+
+    status () {
+        return this.call('status');
+    }
+
+    currencies (params: currencyParams) {
+        return this.call('currencies', params);
+    }
+
+    latest (params: currencyParams) {
+        return this.call('latest', params);
+    }
+
+    historical (params: currencyParams) {
+        return this.call('historical', params);
+    }
+
+    range (params: currencyParams) {
+        return this.call('range', params);
+    }
+
+    convert (params: currencyParams) {
+        return this.call('convert', params);
+    }
+}
+// it always returns JSON
+export async function getCurrencyRatios(){
+  const currencyApi = new CurrencyAPI(`${currencyApiKey}`);
+  const result = currencyApi.latest({
+    base_currency: "PLN",
+    currencies: "EUR,USD,PLN,GBP"
+  }).then(response => {
+    return response
+  })
+  if(await result){
+    return await result
+  }else{
+    return {
+      "meta": {
+        "last_updated_at": "2023-05-29T23:59:59Z"
+      },
+      "data": {
+        "EUR": {
+          "code": "EUR",
+          "value": 0.221321
+        },
+        "GBP": {
+          "code": "GBP",
+          "value": 0.191902
+        },
+        "PLN": {
+          "code": "PLN",
+          "value": 1
+        },
+        "USD": {
+          "code": "USD",
+          "value": 0.236975
+        }
+      }
+    }
+  }
+}
+// użyj też w submitTransaction
+export async function checkForTransaction(transactionID: string){
+  try{
+    const newDocRef = doc(db, "transactions", transactionID)
+    if(newDocRef){
+      return true
+    }else{
+      return false
+    }
+  }catch(e){
+    return false
+  }
+}
+
+// export async function submitTransaction()
+
+// odejmij potem od counta w produkcie ilość zamówionych produktów, jeśli produkt count = 0, daj mu klasę wyprzedane, daj też w productPage odpowiedni komunikat zamiast buttona dodaj do koszyka, typu produkt obecnie wyczerpany.

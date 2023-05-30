@@ -70,7 +70,7 @@ export default function Header(props: headerProps) {
           </li>
           <li className="nav-links__li">
             <NavLink
-              to="/ShoppingCart"
+              to="/shopping_cart"
               className={({ isActive, isPending }) => (isPending ? "pending" : isActive ? "active" : "")}
             >
               {" "}
@@ -84,10 +84,10 @@ export default function Header(props: headerProps) {
                 <div className="nav-links__li__sub-cathegories__sum">
                   <b>Kwota:</b> 600,92 <span className="currency">zł</span>
                 </div>
-                <NavLink to="/ShoppingCart">
+                <NavLink to="/shopping_cart">
                   <button>Zobacz Koszyk</button>
                 </NavLink>
-                <NavLink to="/Checkout">
+                <NavLink to="/checkout">
                   <button>Zamów</button>
                 </NavLink>
               </div>

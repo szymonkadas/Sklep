@@ -4,10 +4,10 @@ import { useSearchParams } from "react-router-dom";
 import { CollectionData, getCathegoriesData, getProductsData, productData } from "../../api";
 import { storeDisplayCathegory } from "../../components/Store/CathegoriesFilter";
 import { priceRange } from "../../components/Store/PriceSetter";
-import { changeSearchParams } from "../../utils/changeSearchParams";
 import { createLoaderFunction } from "../../utils/createLoaderFunction";
 import getRouteParam from "../../utils/getRouteParams";
 import getSearchParams from "../../utils/getSearchParams";
+import { changeSearchParams } from "../../utils/store/changeSearchParams";
 import { storeAsideProps } from "./StoreAside";
 const StoreAside = lazy(() => import("./StoreAside"));
 

@@ -1,10 +1,10 @@
 import { ChangeEvent, FC, useContext, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { StoreData, allCathegoriesSelectorName, filterProducts } from "../../pages/store/StoreLayout";
-import { changeSearchParams } from "../../utils/changeSearchParams";
-import createProductNames from "../../utils/createProductNames";
 import getRouteParam from "../../utils/getRouteParams";
 import getSearchParams from "../../utils/getSearchParams";
+import { changeSearchParams } from "../../utils/store/changeSearchParams";
+import createProductNames from "../../utils/store/createProductNames";
 import { priceRange } from "./PriceSetter";
 
 const Searchbar: FC = () => {

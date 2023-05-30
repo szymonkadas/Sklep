@@ -2,10 +2,10 @@ import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } 
 import Layout, { headerLoader } from "./components/Layout";
 import "./style/App.css";
 // import Checkout from "./pages/Checkout";
-import Home, { homeLoader } from "./pages/Home";
-import StoreLayout, { storeLoader } from "./pages/store/StoreLayout";
-// import ShoppingCart from "./pages/ShoppingCart";
 import NotFound from ".//pages/NotFound";
+import Home, { homeLoader } from "./pages/Home";
+import ShoppingCart, { shoppingCartLoader } from "./pages/ShoppingCart";
+import StoreLayout, { storeLoader } from "./pages/store/StoreLayout";
 //   Link
 import ProductPage from "./pages/store/ProductPage";
 import Store from "./pages/store/Store";
@@ -41,8 +41,8 @@ function App() {
         <Route path=":productName" element={<Product />}></Route>
       </Route> */}
         {/* <Route path="/about" element={<About />}></Route> */}
-        {/* <Route path="/shopping_cart" element={<ShoppingCart />} />
-      <Route path="/checkout" element={<Checkout />} /> */}
+        <Route path="/shopping_cart" element={<ShoppingCart />} loader={shoppingCartLoader} />
+        {/* <Route path="/checkout/:transactionId" element={<Checkout />} /> */}
         <Route path="*" element={<NotFound />} />
       </Route>
     )

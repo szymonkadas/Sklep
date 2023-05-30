@@ -3,6 +3,8 @@ import { NavLink, useParams, useSearchParams } from "react-router-dom";
 import { productData } from "../../api";
 import { allCathegoriesSelectorName } from "../../pages/store/StoreLayout";
 import getRouteParams from "../../utils/getRouteParams";
+import addProductToSC from "../../utils/shoppingCart/addProductToSC";
+import currencyConverter from "../../utils/shoppingCart/currencyConverter";
 import ProductRating from "./ProductRating";
 interface ProductProps extends productData {
   classNamePrefix: string;
@@ -63,22 +65,25 @@ const ProductTile: FC<ProductProps> = (props) => {
           ratingPath={props.rating}
         ></ProductRating>
       </div>
+      <button
+        className={`${props.classNamePrefix}__product__add-product-button`}
+        onClick={() =>
+          addProductToSC({
+            cathegory: props.cathegory,
+            count: props.count,
+            currency: props.currency,
+            discount: props.discount,
+            discount_price: props.discount_price,
+            id: props.id,
+            name: props.name,
+            photo: props.photo,
+            price: props.price,
+          })
+        }
+      >
+        Dodaj do koszyka
+      </button>
     </div>
   );
 };
 export default ProductTile;
-
-export function currencyConverter(currency: string) {
-  switch (currency) {
-    case "pln":
-      return "zł";
-    case "eur":
-      return "€";
-    case "usd":
-      return "$";
-    case "gbp":
-      return "£";
-    default:
-      return currency;
-  }
-}

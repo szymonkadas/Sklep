@@ -1,9 +1,9 @@
 import { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { StoreData, allCathegoriesSelectorName, filterProducts, getPriceRange } from "../../pages/store/StoreLayout";
-import { changeSearchParams } from "../../utils/changeSearchParams";
 import getRouteParam from "../../utils/getRouteParams";
 import getSearchParams from "../../utils/getSearchParams";
+import { changeSearchParams } from "../../utils/store/changeSearchParams";
 
 export type priceRange = {
   maxPrice: number;

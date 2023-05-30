@@ -6,11 +6,7 @@ import ProductTile from "../../components/Store/ProductTile";
 import getRouteParams from "../../utils/getRouteParams";
 import { arrayData, fetchedProductData } from "./StoreLayout";
 
-// type StoreProps = {
-//   filteredProducts: arrayData;
-// };
-// PROBLEM: PRZY KLIKANIU PRZEZ NAVBAR NIE USTAWIA PARAMETRÓW! ORAZ: JAK JEST STORE NIE USTAWIA /ALL!
-const Store: FC<PropsWithChildren> = (props) => {
+const Store: FC<PropsWithChildren> = () => {
   const { currentCathegory } = getRouteParams(useParams(), ["currentCathegory"], [""]);
   const redirection = useNavigate();
   useEffect(() => {

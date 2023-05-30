@@ -3,9 +3,11 @@ import { useLocation, useNavigate, useOutletContext, useParams } from "react-rou
 import { NavLink, useSearchParams } from "react-router-dom";
 import { productData } from "../../api";
 import ProductRating, { getRatingData } from "../../components/Store/ProductRating";
-import ProductTile, { currencyConverter } from "../../components/Store/ProductTile";
+import ProductTile from "../../components/Store/ProductTile";
 import { createRadioInput } from "../../utils/createRadioInput";
 import getRouteParams from "../../utils/getRouteParams";
+import addProductToSC from "../../utils/shoppingCart/addProductToSC";
+import currencyConverter from "../../utils/shoppingCart/currencyConverter";
 import { allCathegoriesSelectorName, arrayData } from "./StoreLayout";
 const ProductPage: FC = () => {
   const [size, setSize] = useState("");
@@ -172,8 +174,27 @@ const ProductPage: FC = () => {
               })}
             </ul>
             <div className={`store__product-page__data__submit`}>
-              <button> DO KOSZYKA </button>
-              <i>ikonka koszyka</i>
+              <NavLink to="/shopping_cart">
+                <button
+                  className={`store__product-page__data__submit__button`}
+                  onClick={() =>
+                    addProductToSC({
+                      cathegory: product.cathegory,
+                      count: product.count,
+                      currency: product.currency,
+                      discount: product.discount,
+                      discount_price: product.discount_price,
+                      id: productId,
+                      name: product.name,
+                      photo: product.photo,
+                      price: product.price,
+                    })
+                  }
+                >
+                  Dodaj do koszyka
+                </button>
+                <i>ikonka koszyka</i>
+              </NavLink>
             </div>
           </div>
         </section>
@@ -219,7 +240,7 @@ function createProposalsOfProductTiles(
   const result = [];
   const pushed = new Set<string>(productId);
   // first iterate through array from filteredMap (max times 3*times) to look for potential productData, then if it was not enough, iterate with the same idea through backupMap, if not so, THEN iterate through MAP for certainty.
-  loopThrough(filteredMap);
+  filteredMap.size > 0 && loopThrough(filteredMap);
   if (result.length < times) {
     loopThrough(backupMap);
   }
@@ -229,7 +250,11 @@ function createProposalsOfProductTiles(
         if (pushed.has(key)) continue;
         pushed.add(key);
         result.push(
-          <ProductTile classNamePrefix="store__product-page--propsals" {...value} id={`${parseInt(key)}`}></ProductTile>
+          <ProductTile
+            classNamePrefix="store__product-page--proposals"
+            {...value}
+            id={`${parseInt(key)}`}
+          ></ProductTile>
         );
       } else {
         break;
@@ -250,7 +275,7 @@ function createProposalsOfProductTiles(
         pushed.add(productData[0]);
         result.push(
           <ProductTile
-            classNamePrefix="store__product-page--propsals"
+            classNamePrefix="store__product-page--proposals"
             {...productData[1]}
             id={`${parseInt(productData[0])}`}
           ></ProductTile>
