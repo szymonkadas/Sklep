@@ -1,8 +1,8 @@
-import { shoppingCartData } from "./addProductToSC";
+import { ShoppingCartData } from "./addProductToSC";
 export default function changeSCProductQuantity(productId: string, desiredQuantity: number) {
   const cartData = localStorage.getItem("shoppingCart");
   if (cartData) {
-    const mappedData = new Map<string, shoppingCartData>(JSON.parse(cartData));
+    const mappedData = new Map<string, ShoppingCartData>(JSON.parse(cartData));
     const desiredRecord = mappedData.get(productId);
     if (desiredRecord) {
       const quantity =

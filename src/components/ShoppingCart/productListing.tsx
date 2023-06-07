@@ -1,29 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { shoppingCartData } from "../../utils/shoppingCart/addProductToSC";
+import { ShoppingCartData } from "../../utils/shoppingCart/addProductToSC";
+import Price from "../Store/ProductComponents/Price";
 
-type productListingProps = {
+type ProductListingProps = {
+  id: string;
   classNamePrefix: string;
-  data: shoppingCartData;
-  onQuantityChange: () => void;
-  updateData: (id: string, quantity: number) => void;
+  data: ShoppingCartData;
+  updateListedProductsData: (id: string, quantity: number) => void;
+  onQuantityChange?: () => void;
 };
 
-function ProductListing(props: productListingProps) {
+function ProductListing(props: ProductListingProps) {
   const [quantity, setQuantity] = useState(props.data.quantity);
   let quantityTimeoutRef: React.MutableRefObject<NodeJS.Timeout | false> = useRef(false);
 
   useEffect(() => {
-    props.onQuantityChange();
-    if (quantity) {
-      if (quantityTimeoutRef.current) clearTimeout(quantityTimeoutRef.current);
-      quantityTimeoutRef.current = setTimeout(() => {
-        props.updateData(props.data.productData.id, quantity);
-      }, 500);
+    if (props.onQuantityChange) {
+      props.onQuantityChange();
+      if (quantity) {
+        if (quantityTimeoutRef.current) clearTimeout(quantityTimeoutRef.current);
+        quantityTimeoutRef.current = setTimeout(() => {
+          props.updateListedProductsData(props.data.productData.id, quantity);
+        }, 500);
+      }
     }
   }, [quantity]);
   return (
-    <li className={`${props.classNamePrefix}__product-item`}>
+    <li id={props.id} className={`${props.classNamePrefix}__product-item`}>
       <NavLink to={`/store/all/${props.data.productData.id}`}>
         <img
           className={`${props.classNamePrefix}__product-item__img`}
@@ -33,36 +37,44 @@ function ProductListing(props: productListingProps) {
       <NavLink to={`/store/all/${props.data.productData.id}`}>
         <h5 className={`${props.classNamePrefix}__product-item__name`}>{props.data.productData.name}</h5>
       </NavLink>
-      <button
-        className={`${props.classNamePrefix}__product-item__button`}
-        onClick={() => {
-          modifyQuantity(-1, 1, props.data.productData.count, quantity || 2, setQuantity);
-        }}
-      >
-        -
-      </button>
-      <input
-        type="number"
-        value={quantity}
-        onChange={(event) =>
-          modifyQuantity(parseInt(event.target.value), 1, props.data.productData.count, 0, setQuantity)
-        }
-      ></input>
-      <button
-        className={`${props.classNamePrefix}__product-item__button`}
-        onClick={() => {
-          modifyQuantity(1, 1, props.data.productData.count, quantity || 0, setQuantity);
-        }}
-      >
-        +
-      </button>
-      <h5 className={`${props.classNamePrefix}__product-item__price`}>
-        {props.data.productData.discount ? props.data.productData.discount_price : props.data.productData.price}
-      </h5>
+      {props.onQuantityChange && (
+        <>
+          <button
+            className={`${props.classNamePrefix}__product-item__button`}
+            onClick={() => {
+              modifyQuantity(-1, 1, props.data.productData.count, quantity || 2, setQuantity);
+            }}
+          >
+            -
+          </button>
+          <input
+            type="number"
+            value={quantity}
+            onChange={(event) =>
+              modifyQuantity(parseInt(event.target.value), 1, props.data.productData.count, 0, setQuantity)
+            }
+          ></input>
+          <button
+            className={`${props.classNamePrefix}__product-item__button`}
+            onClick={() => {
+              modifyQuantity(1, 1, props.data.productData.count, quantity || 0, setQuantity);
+            }}
+          >
+            +
+          </button>
+        </>
+      )}
+      <Price
+        classNamePrefix={`${props.classNamePrefix}__product-item`}
+        discount={props.data.productData.discount}
+        discountPrice={props.data.productData.discount_price}
+        price={props.data.productData.price}
+        currency={props.data.productData.currency}
+      ></Price>
       <button
         className={`${props.classNamePrefix}__product-item__delete-button`}
         onClick={() => {
-          props.updateData(props.data.productData.id, 0);
+          props.updateListedProductsData(props.data.productData.id, 0);
         }}
       >
         <i>kosz</i>

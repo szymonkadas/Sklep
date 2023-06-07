@@ -26,10 +26,9 @@ export const homeLoader = await createLoaderFunction(
   ],
   "homePageData"
 );
-export interface homePageComponentsData {
+export interface HomePageComponentsData {
   data: DocumentData;
   photosPath?: string;
-  // className?: string
 }
 
 export default function Home() {

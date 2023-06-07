@@ -1,15 +1,18 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router";
 import { NavLink, useSearchParams } from "react-router-dom";
-import { productData } from "../../api";
+import { ProductData } from "../../api";
+import Price from "../../components/Store/ProductComponents/Price";
+import ProductImage from "../../components/Store/ProductComponents/ProductImage";
+import ProposalsOfProductTiles from "../../components/Store/ProductComponents/ProposalsOfProductTiles";
+import RadioInput from "../../components/Store/ProductComponents/RadioInput";
 import ProductRating, { getRatingData } from "../../components/Store/ProductRating";
-import ProductTile from "../../components/Store/ProductTile";
-import { createRadioInput } from "../../utils/createRadioInput";
+import { currencySigns } from "../../utils/currencyUtils";
 import getRouteParams from "../../utils/getRouteParams";
 import addProductToSC from "../../utils/shoppingCart/addProductToSC";
-import currencyConverter from "../../utils/shoppingCart/currencyConverter";
-import { allCathegoriesSelectorName, arrayData } from "./StoreLayout";
+import { ArrayData, allCathegoriesSelectorName } from "./StoreLayout";
 const ProductPage: FC = () => {
+  const classNamePrefix = "store__product-page";
   const [size, setSize] = useState("");
   const [additionalInfoCathegory, setAdditionalInfoCathegory] = useState("opis produktu");
   const [ratingData, setRatingData] = useState({
@@ -17,12 +20,12 @@ const ProductPage: FC = () => {
     description: "This product doesn't have any opinions so far.",
   });
   const { productsMap, filteredProductsMap } = useOutletContext() as {
-    productsMap: Map<string, productData>;
-    filteredProductsMap: Map<string, productData>;
+    productsMap: Map<string, ProductData>;
+    filteredProductsMap: Map<string, ProductData>;
   };
   const { currentCathegory, productId } = getRouteParams(
     useParams(),
-    ["currentCathegory", "productId"],
+    ["current_cathegory", "product_id"],
     [allCathegoriesSelectorName, ""]
   );
   const [searchParams, setSearchParam] = useSearchParams();
@@ -36,11 +39,23 @@ const ProductPage: FC = () => {
       getRatingData(product.rating).then((data) => setRatingData(data));
     }
   }, []);
+  // it has to be memoized due to it's nature (using random numbers) otherwise it will rerender.
+  const Proposals = useMemo(
+    () => (
+      <ProposalsOfProductTiles
+        filteredMap={filteredProductsMap}
+        backupMap={productsMap}
+        productId={productId}
+        times={4}
+      />
+    ),
+    []
+  );
   const additionalInfoContent = useMemo(() => {
     switch (additionalInfoCathegory) {
       case "opis produktu":
         return (
-          <p className="store__product-page--additional-info__description">
+          <p className="${classNamePrefix}--additional-info__description">
             Lorem, ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis autem laboriosam architecto eius at
             animi, voluptates quam fuga magni id, sunt quisquam cumque illum hic? Perferendis incidunt pariatur illum
             inventore.
@@ -50,12 +65,12 @@ const ProductPage: FC = () => {
         const desc =
           ratingData.description === "" ? "This product doesn't have any opinions so far." : ratingData.description;
         return (
-          <div className="store__product-page--additional-info__opinions">
+          <div className="${classNamePrefix}--additional-info__opinions">
             <ProductRating
               rating={ratingData.rating}
-              classNamePrefix={"store__product-page--additional-info__opinions"}
+              classNamePrefix={"${classNamePrefix}--additional-info__opinions"}
             ></ProductRating>
-            <p className="store__product-page--additional-info__opinions__description">{desc}</p>
+            <p className="${classNamePrefix}--additional-info__opinions__description">{desc}</p>
           </div>
         );
       default:
@@ -64,9 +79,11 @@ const ProductPage: FC = () => {
   }, [additionalInfoCathegory, ratingData]);
   //if is needed for first run (until useEffect runs) and ts.
   if (product) {
-    const currency: string = currencyConverter(product.currency);
+    //If there's no such currency then it shouldn't be accepted.
+    if (!currencySigns.get(product.currency)) {
+      return <></>;
+    }
     const opinionCount = ratingData.rating ? "1" : "0";
-    const Proposals = createProposalsOfProductTiles(filteredProductsMap, productsMap, productId, 4);
     const path = useLocation()
       .pathname.split("/")
       .reduce(
@@ -74,19 +91,19 @@ const ProductPage: FC = () => {
           accum: { cumulatedPath: string; result: JSX.Element[] },
           part: string,
           index: number,
-          arrayData: arrayData
+          arrayData: ArrayData
         ) => {
           if (part && index < arrayData.length - 1) {
             const cumulatedPath = accum.cumulatedPath + "/" + part;
             const result = [
               ...accum.result,
-              <>
+              <span key={`store-product-path-${part}${index}`}>
                 <NavLink to={`${cumulatedPath}?${searchParams}`}>{part}</NavLink>/
-              </>,
+              </span>,
             ];
             return { cumulatedPath, result };
           } else if (index == arrayData.length - 1) {
-            const result = [...accum.result, <>{product.name}</>];
+            const result = [...accum.result, <span key={`store-product-path-${product.name}`}>{product.name}</span>];
             return { cumulatedPath: accum.cumulatedPath, result };
           } else {
             return accum;
@@ -94,20 +111,27 @@ const ProductPage: FC = () => {
         },
         { cumulatedPath: "", result: [] }
       ).result;
+    const wearableSizes = ["XS", "S", "M", "L", "XL", "XXL"];
+    const RadioInputs = wearableSizes.map((sizeSign) => (
+      <RadioInput<string>
+        key={`size-picker-${sizeSign}`}
+        classNamePrefix={`${classNamePrefix}__data__size-picker__size`}
+        option={sizeSign}
+        state={{ value: size, action: setSize }}
+      />
+    ));
     return (
-      <article className="store__product-page--container">
+      <article className="${classNamePrefix}--container">
         {/* product basic info */}
-        <section className={`store__product-page`}>
+        <section className={`${classNamePrefix}`}>
           {/* ::before'a zrobić przed nim jeśli będzie discount. */}
-          <figure className={`store__product-page__image-container`}>
-            <img
-              src={`/src/assets/${product.photo}`}
-              alt={`${product.name}-image`}
-              className={`product__image store__product-page__image${
-                product.discount ? "--discount-active" : "--discount-inactive"
-              }`}
-              width="400px"
-            ></img>
+          <figure className={`${classNamePrefix}__image-container`}>
+            <ProductImage
+              classNamePrefix="${classNamePrefix}"
+              name={product.name}
+              photo={product.photo}
+              discount={product.discount}
+            />
             {/* po hoverze na image powyżej, odpala się funkcja która obrazek poniżej pokazuje. (będzie ustawiony na tym  wyżej relativem/absolutem)
           Obrazek poniżej powinien być większy niż figure, (figure overflow hidden), 
           a przy pomocy funkcji z myszką (onmouseout, over, move) na nim określimy jego position top: i left: by był zzoomowany tam gdzie lecimy myszorem : D*/}
@@ -116,67 +140,26 @@ const ProductPage: FC = () => {
             <img
               src={`/src/assets/${product.photo}`}
               alt={`${product.name}-image--zoom`}
-              className={`product__image-zoom store__product-page__image--zoom`}
+              className={`product__image-zoom ${classNamePrefix}__image--zoom`}
               width="800px"
               style={{ opacity: "0" }}
             ></img>
           </figure>
-          <div className={`product__data store__product-page__data`}>
-            <p className={`store__product-page__data__path`}>{path}</p>
-            <h6 className={`product__data__name store__product-page__data__name`}>{product.name}</h6>
-            <p className={`product__data__price store__product-page__data__price`}>
-              <span
-                className={`product__data__price__regular${
-                  product.discount && "--inactive"
-                } store__product-page__data__price__regular${product.discount && "--inactive"}`}
-              >
-                {product.price}
-                &nbsp;
-                <span className={`product__data__price__currency store__product-page__data__price__currency`}>
-                  {currency}
-                </span>
-              </span>
-              {product.discount && (
-                <span className={`product__data__price__discount store__product-page__data__price__discount`}>
-                  {product.discount_price}
-                  &nbsp;
-                  <span className={`product__data__price__currency store__product-page__data__price__currency`}>
-                    {currency}
-                  </span>
-                  &nbsp;
-                </span>
-              )}
-            </p>
-            <ul className={`store__product-page__data__size-picker`}>
-              {createRadioInput<string>("store__product-page__data__size-picker__size", "XS", {
-                value: size,
-                action: setSize,
-              })}
-              {createRadioInput<string>("store__product-page__data__size-picker__size", "S", {
-                value: size,
-                action: setSize,
-              })}
-              {createRadioInput<string>("store__product-page__data__size-picker__size", "M", {
-                value: size,
-                action: setSize,
-              })}
-              {createRadioInput<string>("store__product-page__data__size-picker__size", "L", {
-                value: size,
-                action: setSize,
-              })}
-              {createRadioInput<string>("store__product-page__data__size-picker__size", "XL", {
-                value: size,
-                action: setSize,
-              })}
-              {createRadioInput<string>("store__product-page__data__size-picker__size", "XXL", {
-                value: size,
-                action: setSize,
-              })}
-            </ul>
-            <div className={`store__product-page__data__submit`}>
+          <div className={`product__data ${classNamePrefix}__data`}>
+            <p className={`${classNamePrefix}__data__path`}>{path}</p>
+            <h6 className={`product__data__name ${classNamePrefix}__data__name`}>{product.name}</h6>
+            <Price
+              classNamePrefix="${classNamePrefix}"
+              discount={product.discount}
+              discountPrice={product.discount_price}
+              price={product.price}
+              currency={product.currency}
+            />
+            <ul className={`${classNamePrefix}__data__size-picker`}>{...RadioInputs}</ul>
+            <div className={`${classNamePrefix}__data__submit`}>
               <NavLink to="/shopping_cart">
                 <button
-                  className={`store__product-page__data__submit__button`}
+                  className={`${classNamePrefix}__data__submit__button`}
                   onClick={() =>
                     addProductToSC({
                       cathegory: product.cathegory,
@@ -199,28 +182,29 @@ const ProductPage: FC = () => {
           </div>
         </section>
         {/* product opinions + description of what its made of etc */}
-        <section className={`store__product-page--additional-info`}>
-          <ul className="store__product-page--additional-info__nav">
-            {createRadioInput<string>("store__product-page--additional-info__nav__option", "opis produktu", {
-              value: additionalInfoCathegory,
-              action: setAdditionalInfoCathegory,
-            })}
-            {createRadioInput<string>(
-              "store__product-page--additional-info__nav__option",
-              "opinie",
-              {
-                value: additionalInfoCathegory,
-                action: setAdditionalInfoCathegory,
-              },
-              opinionCount
-            )}
+        <section className={`${classNamePrefix}--additional-info`}>
+          <ul className="${classNamePrefix}--additional-info__nav">
+            <RadioInput<string>
+              key={`radio-input-opis__produktu`}
+              classNamePrefix={`${classNamePrefix}--additional-info__nav__option`}
+              option="opis produktu"
+              state={{ value: additionalInfoCathegory, action: setAdditionalInfoCathegory }}
+            />
+
+            <RadioInput<string>
+              key={`radio-input-opinie`}
+              classNamePrefix={`${classNamePrefix}--additional-info__nav__option`}
+              option="opinie"
+              state={{ value: additionalInfoCathegory, action: setAdditionalInfoCathegory }}
+              count={opinionCount}
+            />
           </ul>
           {additionalInfoContent}
         </section>
         {/* another products proposals */}
-        <section className="store__product-page--proposals">
+        <section className="${classNamePrefix}--proposals">
           <h4>Sprawdź również:</h4>
-          {...Proposals}
+          {Proposals}
         </section>
       </article>
     );
@@ -230,57 +214,3 @@ const ProductPage: FC = () => {
 };
 
 export default ProductPage;
-
-function createProposalsOfProductTiles(
-  filteredMap: Map<string, productData>,
-  backupMap: Map<string, productData>,
-  productId: string,
-  times: number
-): JSX.Element[] {
-  const result = [];
-  const pushed = new Set<string>(productId);
-  // first iterate through array from filteredMap (max times 3*times) to look for potential productData, then if it was not enough, iterate with the same idea through backupMap, if not so, THEN iterate through MAP for certainty.
-  filteredMap.size > 0 && loopThrough(filteredMap);
-  if (result.length < times) {
-    loopThrough(backupMap);
-  }
-  if (result.length < times) {
-    for (const [key, value] of backupMap.entries()) {
-      if (result.length < times) {
-        if (pushed.has(key)) continue;
-        pushed.add(key);
-        result.push(
-          <ProductTile
-            classNamePrefix="store__product-page--proposals"
-            {...value}
-            id={`${parseInt(key)}`}
-          ></ProductTile>
-        );
-      } else {
-        break;
-      }
-    }
-  }
-  return result;
-
-  // helper function
-  function loopThrough(targetMap: Map<string, productData>) {
-    const targetArray = Array.from(targetMap);
-    let i = 0;
-    while (result.length < times && i < 3 * times) {
-      i++;
-      let index = Math.floor(Math.random() * targetArray.length);
-      const productData = targetArray[index];
-      if (!pushed.has(productData[0])) {
-        pushed.add(productData[0]);
-        result.push(
-          <ProductTile
-            classNamePrefix="store__product-page--proposals"
-            {...productData[1]}
-            id={`${parseInt(productData[0])}`}
-          ></ProductTile>
-        );
-      }
-    }
-  }
-}

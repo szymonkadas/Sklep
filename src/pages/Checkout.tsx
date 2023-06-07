@@ -18,7 +18,7 @@ const Checkout: FC = () => {
   try {
     const products = useLoaderData();
     const params = useParams();
-    const transactionId = getRouteParams(params, ["transactionId"], [""]);
+    const transactionId = getRouteParams(params, ["transaction_id"], [""]);
     console.log(products);
     if (products && transactionId) {
       return <article className="checkout--filled"> </article>;

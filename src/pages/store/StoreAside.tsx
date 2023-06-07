@@ -1,15 +1,19 @@
 import CathegoriesFilter from "../../components/Store/CathegoriesFilter";
-import PriceSetter from "../../components/Store/PriceSetter";
+import PriceSetter, { PriceRange } from "../../components/Store/PriceSetter";
 import Searchbar from "../../components/Store/Searchbar";
-import { arrayData, fetchedProductData } from "./StoreLayout";
-export type storeAsideProps = {
-  filteredProducts: arrayData;
+import { CurrenciesMap } from "../../utils/currencyUtils";
+import { ArrayData, FetchedProductData } from "./StoreLayout";
+
+export type StoreAsideProps = {
+  filteredProducts: ArrayData;
+  currenciesMap: CurrenciesMap;
+  defaultPriceRange: PriceRange;
   clearFilters: () => void;
 };
-const StoreAside = function (props: storeAsideProps) {
+const StoreAside = function (props: StoreAsideProps) {
   // provides filtered cathegories with their unique product quantity.
   const filteredCathegoriesProductMap = new Map<string, number>();
-  props.filteredProducts.forEach((product: fetchedProductData) => {
+  props.filteredProducts.forEach((product: FetchedProductData) => {
     if (filteredCathegoriesProductMap.has(product.data.cathegory)) {
       filteredCathegoriesProductMap.set(
         product.data.cathegory,
@@ -24,8 +28,8 @@ const StoreAside = function (props: storeAsideProps) {
   return (
     <aside className="store-aside">
       <button onClick={() => props.clearFilters()}>Clear filters</button>
-      <Searchbar></Searchbar>
-      <PriceSetter></PriceSetter>
+      <Searchbar currenciesMap={props.currenciesMap}></Searchbar>
+      <PriceSetter currenciesMap={props.currenciesMap} defaultPriceRange={props.defaultPriceRange}></PriceSetter>
       <CathegoriesFilter filteredCathegoriesProductMap={filteredCathegoriesProductMap}></CathegoriesFilter>
     </aside>
   );

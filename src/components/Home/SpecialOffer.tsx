@@ -1,6 +1,6 @@
-import { homePageComponentsData } from "../../pages/Home";
+import { HomePageComponentsData } from "../../pages/Home";
 
-export default function SpecialOffer(props: homePageComponentsData) {
+export default function SpecialOffer(props: HomePageComponentsData) {
   const localStyle = {
     backgroundImage: `url(${props.photosPath + props.data.photo})`,
   };

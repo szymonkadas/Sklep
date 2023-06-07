@@ -94,7 +94,7 @@
             text-transform: uppercase;
         }
     }
-    .nav-links__li__sub-cathegories__listed-items {
+    .nav-links__li__sub-cathegories__products__list, .nav-links__li__sub-cathegories__listed-items {
         @include flexit;
         flex-direction: column;
         height: fit-content;
@@ -106,6 +106,9 @@
             border-bottom: 2px solid $primary-dark;
             border-radius: 2px;
             padding: 0.5em 0;
+        }
+        .nav-links__li__sub-cathegories__products__list__product-item__img{
+            height: 60px;
         }
     }
     .nav-links__li__sub-cathegories__sum {

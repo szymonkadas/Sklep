@@ -1,15 +1,12 @@
 import { LoaderFunction } from "react-router";
 import { CollectionData, DocData } from "../api";
 
-interface dataKeys {
+interface DataKeys {
   key: string;
   fetcher: () => Promise<CollectionData | DocData>;
 }
 
-export async function createLoaderFunction(
-  dataKeys: dataKeys[],
-  localStorageKey: string
-) {
+export async function createLoaderFunction(dataKeys: DataKeys[], localStorageKey: string) {
   const loader: LoaderFunction = async ({ params, request }) => {
     //this localstorage is created purely of need to decrease api requests which are limited.
     const storeData = localStorage.getItem(localStorageKey);
@@ -22,7 +19,7 @@ export async function createLoaderFunction(
         };
       }, {});
     } else {
-      async function fetchData(dataKeys: dataKeys[]) {
+      async function fetchData(dataKeys: DataKeys[]) {
         const entries = await Promise.all(
           dataKeys.map(async (dataKey) => {
             const value = await dataKey.fetcher();

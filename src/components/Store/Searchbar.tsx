@@ -1,22 +1,27 @@
 import { ChangeEvent, FC, useContext, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { StoreData, allCathegoriesSelectorName, filterProducts } from "../../pages/store/StoreLayout";
+import { CurrenciesMap } from "../../utils/currencyUtils";
 import getRouteParam from "../../utils/getRouteParams";
 import getSearchParams from "../../utils/getSearchParams";
 import { changeSearchParams } from "../../utils/store/changeSearchParams";
 import createProductNames from "../../utils/store/createProductNames";
-import { priceRange } from "./PriceSetter";
+import { PriceRange } from "./PriceSetter";
 
-const Searchbar: FC = () => {
+type SearchbarProps = {
+  currenciesMap: CurrenciesMap;
+};
+const Searchbar: FC<SearchbarProps> = (props: SearchbarProps) => {
   //State and memoVariables
   const [searchParams, setSearchParams] = useSearchParams();
   const { searchVal, usersMaxPrice, usersMinPrice } = getSearchParams(searchParams, [
-    "searchVal",
-    "usersMaxPrice",
-    "usersMinPrice",
+    "search_val",
+    "users_max_price",
+    "users_min_price",
   ]);
-  const usersPriceRange: priceRange = { maxPrice: parseFloat(usersMaxPrice), minPrice: parseFloat(usersMinPrice) };
-  const { currentCathegory } = getRouteParam(useParams(), ["currentCathegory"], [allCathegoriesSelectorName]);
+  const usersPriceRange: PriceRange = { maxPrice: parseFloat(usersMaxPrice), minPrice: parseFloat(usersMinPrice) };
+  const { currentCathegory } = getRouteParam(useParams(), ["current_cathegory"], [allCathegoriesSelectorName]);
+  const { selectedCurrency } = getSearchParams(searchParams, ["selected_currency"]);
   const [searchbarVal, setSearchbarVal] = useState("");
   const [selectedCathegory, setSelectedCathegory] = useState(currentCathegory);
   const changeURLCathegory = useNavigate();
@@ -54,7 +59,9 @@ const Searchbar: FC = () => {
     if (sBvalue !== "") {
       setSearchingState(true);
       changeTimeoutRef.current = setTimeout(() => {
-        const filteredData = createProductNames(filterProducts(products, sBvalue, cathegory, usersPriceRange));
+        const filteredData = createProductNames(
+          filterProducts(products, props.currenciesMap, selectedCurrency, sBvalue, cathegory, usersPriceRange)
+        );
         const filteredProposals = filteredData.map((productName: string, index: number) => {
           return (
             index < 3 && (

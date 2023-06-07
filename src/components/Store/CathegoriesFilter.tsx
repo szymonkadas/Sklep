@@ -3,17 +3,17 @@ import { NavLink, useParams, useSearchParams } from "react-router-dom";
 import { StoreData, allCathegoriesSelectorName } from "../../pages/store/StoreLayout";
 import getRouteParams from "../../utils/getRouteParams";
 
-export interface storeDisplayCathegory {
+export interface StoreDisplayCathegory {
   cathegoryName: string;
   differentProductsCount: number;
 }
-interface cathegoriesProps {
+interface CathegoriesProps {
   filteredCathegoriesProductMap: Map<string, number>;
 }
 
-const CathegoriesFilter: FC<cathegoriesProps> = (props) => {
+const CathegoriesFilter: FC<CathegoriesProps> = (props) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { currentCathegory } = getRouteParams(useParams(), ["currentCathegory"], [allCathegoriesSelectorName]);
+  const { currentCathegory } = getRouteParams(useParams(), ["current_cathegory"], [allCathegoriesSelectorName]);
   const allCathegoriesSelector = useContext(StoreData).allCathegoriesSelector;
   // tracks total number of filtered products, shaped while making cathegories.
   let filteredProductsSum = 0;
@@ -30,10 +30,6 @@ const CathegoriesFilter: FC<cathegoriesProps> = (props) => {
         <NavLink
           to={`/store/${cathegory.cathegoryName}?${searchParams}`}
           className={`store-aside__cathegories-filter__listing__link${activeClass}`}
-          // onClick={() => {
-          //   // changeSearchParams(searchParams, ["currentCathegory"], [`${cathegory.cathegoryName}`]);
-          //   // setSearchParams(`${searchParams}`);
-          // }}
         >
           {cathegory.cathegoryName}
         </NavLink>
@@ -54,10 +50,6 @@ const CathegoriesFilter: FC<cathegoriesProps> = (props) => {
             className={`store-aside__cathegories-filter__listing__link${
               currentCathegory === "" ? "--active" : "--inactive"
             }`}
-            // onClick={() => {
-            //   changeSearchParams(searchParams, ["currentCathegory"], [""]);
-            //   setSearchParams(`${searchParams}`);
-            // }}
           >
             {allCathegoriesSelector.cathegoryName}
           </NavLink>

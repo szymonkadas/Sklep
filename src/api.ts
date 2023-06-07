@@ -12,8 +12,7 @@ import {
   getFirestore,
   setDoc
 } from "firebase/firestore/lite";
-import currency from "./utils/currency";
-import currencyUpperCase from "./utils/currencyUpperCase";
+import { Currency, CurrencyUpperCase } from "./utils/currencyUtils";
 
 const currencyApiKey = `${import.meta.env.VITE_CURRENCY_API_KEY}`
 
@@ -210,9 +209,9 @@ export const getProductRating = async (ratingPath: string = "/ratings/0") =>{
   }
 } 
 
-export interface productData{
+export interface ProductData{
   count: number,
-  currency: currency,
+  currency: Currency,
   discount: boolean,
   discount_price: number,
   home_page_display: boolean,
@@ -222,7 +221,7 @@ export interface productData{
   rating: string,
   cathegory: string,
 }
-export async function addStoreProduct(data: productData, id: string){
+export async function addStoreProduct(data: ProductData, id: string){
     try {
       const newDocRef = doc(db, "store", id);
       await setDoc(newDocRef, {
@@ -234,14 +233,14 @@ export async function addStoreProduct(data: productData, id: string){
   }
 }
 
-export type currencyRatios = {
+export type CurrencyRatios = {
   meta: {last_updated_at: string },
-  data: {[key in currencyUpperCase]: {
-    code: currencyUpperCase,
+  data: {[key in CurrencyUpperCase]: {
+    code: CurrencyUpperCase,
     value: number
   }}
 }
-type currencyParams = {
+type CurrencyParams = {
   [key: string]: string
 }
 class CurrencyAPI {
@@ -270,28 +269,28 @@ class CurrencyAPI {
         return this.call('status');
     }
 
-    currencies (params: currencyParams) {
+    currencies (params: CurrencyParams) {
         return this.call('currencies', params);
     }
 
-    latest (params: currencyParams) {
+    latest (params: CurrencyParams) {
         return this.call('latest', params);
     }
 
-    historical (params: currencyParams) {
+    historical (params: CurrencyParams) {
         return this.call('historical', params);
     }
 
-    range (params: currencyParams) {
+    range (params: CurrencyParams) {
         return this.call('range', params);
     }
 
-    convert (params: currencyParams) {
+    convert (params: CurrencyParams) {
         return this.call('convert', params);
     }
 }
 // it always returns JSON
-export async function getCurrencyRatios(){
+export async function getCurrencyData(){
   const currencyApi = new CurrencyAPI(`${currencyApiKey}`);
   const result = currencyApi.latest({
     base_currency: "PLN",

@@ -1,10 +1,10 @@
-import currency from "../currency";
+import { Currency } from "../currencyUtils";
 
-export default function addProductToSC(productData: shoppingCartProductData) {
+export default function addProductToSC(productData: ShoppingCartProductData) {
   const cartData = localStorage.getItem("shoppingCart");
   if (cartData) {
-    const prevData = new Map<string, shoppingCartData>(JSON.parse(cartData));
-    const currentRecord: shoppingCartData = prevData.get(productData.id) || {
+    const prevData = new Map<string, ShoppingCartData>(JSON.parse(cartData));
+    const currentRecord: ShoppingCartData = prevData.get(productData.id) || {
       productData,
       quantity: 0,
     };
@@ -20,15 +20,15 @@ export default function addProductToSC(productData: shoppingCartProductData) {
     );
   }
 }
-export type shoppingCartRecord = [string, shoppingCartData];
-export type shoppingCartData = {
-  productData: shoppingCartProductData;
+export type ShoppingCartRecord = [string, ShoppingCartData];
+export type ShoppingCartData = {
+  productData: ShoppingCartProductData;
   quantity: number;
 };
-export type shoppingCartProductData = {
+export type ShoppingCartProductData = {
   cathegory: string;
   count: number;
-  currency: currency;
+  currency: Currency;
   discount: boolean;
   discount_price: number;
   id: string;

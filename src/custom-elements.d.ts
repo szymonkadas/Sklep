@@ -3,7 +3,7 @@ declare namespace JSX {
     'range-selector': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   }
 }
-interface simpleRangeEvent extends CustomEvent{
+interface SimpleRangeEvent extends CustomEvent{
   detail: {
     sliderId: string
     minRangeValue: number

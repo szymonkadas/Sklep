@@ -1,11 +1,11 @@
 import { FC } from "react";
 
-type statusBarProps = {
+type StatusBarProps = {
   classNamePrefix: string;
   stage: number;
   stageNames: string[];
 };
-const StatusBar: FC<statusBarProps> = (props) => {
+const StatusBar: FC<StatusBarProps> = (props) => {
   const listItems = props.stageNames.map((stageName, index) => {
     if (index < props.stage) {
       return (

@@ -5,10 +5,9 @@ import "./style/App.css";
 import NotFound from ".//pages/NotFound";
 import Home, { homeLoader } from "./pages/Home";
 import ShoppingCart, { shoppingCartLoader } from "./pages/ShoppingCart";
-import StoreLayout, { storeLoader } from "./pages/store/StoreLayout";
-//   Link
 import ProductPage from "./pages/store/ProductPage";
 import Store from "./pages/store/Store";
+import StoreLayout, { storeLoader } from "./pages/store/StoreLayout";
 export const hasOwnNestedProperty = function (obj: any, propertyPath: string) {
   if (!propertyPath) return false;
   var properties = propertyPath.split(".");
@@ -31,8 +30,8 @@ function App() {
       <Route path="/" element={<Layout />} loader={headerLoader}>
         <Route index element={<Home />} loader={homeLoader}></Route>
         <Route element={<StoreLayout />} path="/store" loader={storeLoader}>
-          <Route path=":currentCathegory" element={<Store></Store>}>
-            <Route path=":productId" element={<ProductPage></ProductPage>}></Route>
+          <Route path=":current_cathegory" element={<Store></Store>}>
+            <Route path=":product_id" element={<ProductPage></ProductPage>}></Route>
           </Route>
         </Route>
         {/* Gotta use protected routes for account routes, remember about that. */}
