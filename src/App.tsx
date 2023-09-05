@@ -1,10 +1,10 @@
 import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
-import Layout, { headerLoader } from "./components/Layout";
+import Layout, { layoutLoader } from "./components/Layout";
 import "./style/App.css";
 // import Checkout from "./pages/Checkout";
 import NotFound from ".//pages/NotFound";
 import Home, { homeLoader } from "./pages/Home";
-import ShoppingCart, { shoppingCartLoader } from "./pages/ShoppingCart";
+import ShoppingCartPage, { shoppingCartLoader } from "./pages/ShoppingCartPage";
 import ProductPage from "./pages/store/ProductPage";
 import Store from "./pages/store/Store";
 import StoreLayout, { storeLoader } from "./pages/store/StoreLayout";
@@ -27,7 +27,7 @@ export const hasOwnNestedProperty = function (obj: any, propertyPath: string) {
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
-      <Route path="/" element={<Layout />} loader={headerLoader}>
+      <Route path="/" element={<Layout />} loader={layoutLoader}>
         <Route index element={<Home />} loader={homeLoader}></Route>
         <Route element={<StoreLayout />} path="/store" loader={storeLoader}>
           <Route path=":current_cathegory" element={<Store></Store>}>
@@ -40,7 +40,7 @@ function App() {
         <Route path=":productName" element={<Product />}></Route>
       </Route> */}
         {/* <Route path="/about" element={<About />}></Route> */}
-        <Route path="/shopping_cart" element={<ShoppingCart />} loader={shoppingCartLoader} />
+        <Route path="/shopping_cart" element={<ShoppingCartPage />} loader={shoppingCartLoader} />
         {/* <Route path="/checkout/:transactionId" element={<Checkout />} /> */}
         <Route path="*" element={<NotFound />} />
       </Route>

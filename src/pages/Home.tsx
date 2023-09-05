@@ -7,7 +7,7 @@ import Cathegories from "../components/Home/Cathegories";
 import Hero from "../components/Home/Hero";
 import IconTextBlock from "../components/Home/IconTextBlock";
 import SpecialOffer from "../components/Home/SpecialOffer";
-import { cathegoryData } from "../components/Layout";
+import { LayoutOutletContext } from "../components/Layout";
 import "../style/pages/css/Home.css";
 import { createLoaderFunction } from "../utils/createLoaderFunction";
 
@@ -33,7 +33,7 @@ export interface HomePageComponentsData {
 
 export default function Home() {
   const loaderData = useLoaderData() as LoaderData;
-  const cathegoriesData = useOutletContext() as cathegoryData[];
+  const { cathegoriesData } = useOutletContext() as LayoutOutletContext;
   const photosPath = "/src/assets/images";
   return (
     <>

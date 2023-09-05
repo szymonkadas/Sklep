@@ -1,14 +1,18 @@
 import { FC, Suspense, createContext, lazy, useEffect, useMemo, useState } from "react";
-import { Outlet, useLoaderData, useNavigate, useParams } from "react-router";
+import { Outlet, useLoaderData, useNavigate, useOutletContext, useParams } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { CollectionData, ProductData, getCathegoriesData, getProductsData } from "../../api";
-import { StoreDisplayCathegory } from "../../components/Store/CathegoriesFilter";
-import { PriceRange } from "../../components/Store/PriceSetter";
+import { LayoutOutletContext, ShoppingCartState } from "../../components/Layout";
 import { createLoaderFunction } from "../../utils/createLoaderFunction";
 import { CurrenciesMap, formatPrice, getCurrencyRate, getCurrencyRates } from "../../utils/currencyUtils";
 import getRouteParams from "../../utils/getRouteParams";
 import getSearchParams from "../../utils/getSearchParams";
 import { changeSearchParams } from "../../utils/store/changeSearchParams";
+import filterProducts from "../../utils/store/filterProducts";
+import getCathegoriesDataForDisplay, {
+  StoreDisplayCathegoriesData,
+} from "../../utils/store/getCathegoriesDataForDisplay";
+import getPriceRange from "../../utils/store/getPriceRange";
 import { StoreAsideProps } from "./StoreAside";
 
 const StoreAside = lazy(() => import("./StoreAside"));
@@ -19,12 +23,13 @@ interface LoaderData {
 }
 export type ArrayData = { [key: string]: any };
 export type FetchedProductData = { data: ProductData; id: string };
-type StoreDisplayCathegoriesData = {
-  cathegories: StoreDisplayCathegory[];
-  allCathegoriesSelector: StoreDisplayCathegory;
-};
-interface StoreData extends StoreDisplayCathegoriesData {
+
+export interface StoreData extends StoreDisplayCathegoriesData {
   products: ArrayData;
+}
+export interface StoreLayoutContext extends ShoppingCartState {
+  filteredProducts: ArrayData;
+  productsMap: Map<string, ProductData>;
 }
 
 export const storeLoader = await createLoaderFunction(
@@ -76,10 +81,12 @@ const StoreLayout: FC = function () {
         );
         setSearchParams(searchParams);
       }
+    }, []);
+    useEffect(() => {
       if (!Object.hasOwn(params, "current_cathegory")) {
         redirect(`/store/${allCathegoriesSelectorName}?${searchParams}`);
       }
-    }, []);
+    }, [[params]]);
     const { currentCathegory } = getRouteParams(params, ["current_cathegory"], [allCathegoriesSelectorName]);
     // default price range of products in selected cathegory.
     const defaultPriceRange = useMemo(
@@ -156,6 +163,14 @@ const StoreLayout: FC = function () {
       defaultPriceRange,
       clearFilters,
     };
+
+    const { setShoppingCartData, shoppingCartData } = useOutletContext() as LayoutOutletContext;
+    const outletContext: StoreLayoutContext = {
+      productsMap,
+      filteredProducts: filteredProducts,
+      setShoppingCartData,
+      shoppingCartData,
+    };
     return (
       <>
         <Suspense fallback={<div>Loading...</div>}>
@@ -169,7 +184,7 @@ const StoreLayout: FC = function () {
             <StoreAside key={`store-aside--clear${storeAsideSwitch}`} {...StoreAsideProps}></StoreAside>
           </StoreData.Provider>
         </Suspense>
-        <Outlet context={{ productsMap, filteredProducts }} />
+        <Outlet context={outletContext} />
       </>
     );
   } catch (error) {
@@ -177,134 +192,5 @@ const StoreLayout: FC = function () {
     return <div className="store-layout__error">Wystąpił błąd w połączeniu</div>;
   }
 };
-
-// HELPER FUNCTIONS
-
-//filters an array of product data based on optional search value, cathegory, and price range arguments.
-export function filterProducts(
-  data: ArrayData,
-  currenciesMap: CurrenciesMap,
-  selectedCurrency: string,
-  searchVal?: string,
-  cathegory?: string,
-  priceRange?: PriceRange
-): ArrayData {
-  let result = JSON.parse(JSON.stringify(data));
-  if (searchVal !== undefined) {
-    result = result.filter((product: FetchedProductData) => {
-      return product.data.name.toLowerCase().includes(searchVal.toLowerCase().trim());
-    });
-  }
-  if (cathegory !== undefined && cathegory.length > 0 && cathegory !== allCathegoriesSelectorName) {
-    result = result.filter((product: FetchedProductData) => product.data.cathegory === cathegory);
-  }
-  if (priceRange !== undefined) {
-    result = result.filter((product: FetchedProductData) => {
-      const rating = getCurrencyRate(product.data.currency, selectedCurrency, currenciesMap) || 1;
-      if (product.data.discount && product.data.discount_price) {
-        const price = product.data.discount_price * rating;
-        if (price >= priceRange.minPrice && price <= priceRange.maxPrice) {
-          return product;
-        }
-      } else if (product.data.price) {
-        const price = product.data.price * rating;
-        if (price >= priceRange.minPrice && price <= priceRange.maxPrice) {
-          return product;
-        }
-      }
-    });
-  }
-  return result;
-}
-
-//countProducts, with countProductsPerCathegory and getCathegoriesDataForDisplay
-//work together to count the number of products in each category and return an object representing this data for display.
-// this one returns object containing cathegoryName and count of different (product can have quantity) products in this cathegory.
-function countProducts(
-  data: ArrayData,
-  cathegoryName: string | false = false,
-  searchVal: string = ""
-): StoreDisplayCathegory {
-  return data.reduce(
-    (accumulator: StoreDisplayCathegory, currVal: FetchedProductData) => {
-      if (currVal.data.name.toLowerCase().includes(searchVal)) {
-        if ((cathegoryName && currVal.data.cathegory.toLowerCase() === cathegoryName.toLowerCase()) || !cathegoryName) {
-          return {
-            ...accumulator,
-            differentProductsCount: accumulator.differentProductsCount + 1,
-          };
-        }
-      }
-      return accumulator;
-    },
-    { cathegoryName, differentProductsCount: 0 }
-  );
-}
-// uses countProducts to return provided cathegories MAPPED, and additionally summary cathegory as sibling object
-function countProductsPerCathegory(cathegories: ArrayData, productsData: ArrayData): StoreDisplayCathegoriesData {
-  let sumOfAllCathegories = 0;
-  const result: StoreDisplayCathegory[] = cathegories.map((cathegoryName: string) => {
-    const countedProducts = countProducts(productsData, cathegoryName);
-    sumOfAllCathegories += countedProducts.differentProductsCount;
-    return countedProducts;
-  });
-  return {
-    cathegories: result,
-    allCathegoriesSelector: {
-      cathegoryName: allCathegoriesSelectorName,
-      differentProductsCount: sumOfAllCathegories,
-    },
-  };
-}
-// takes in cathegories data, and merges its NAMES with product counts in ProductData.
-function getCathegoriesDataForDisplay(cathegories: ArrayData, productsData: ArrayData): StoreDisplayCathegoriesData {
-  let cathegoriesDataCopy: ArrayData[] = JSON.parse(JSON.stringify(cathegories));
-  const cathegoriesNames = cathegoriesDataCopy.map((cathegory: any) => {
-    return cathegory.data.cathegory;
-  });
-  return countProductsPerCathegory(cathegoriesNames, productsData);
-}
-
-// this function calculates and returns the minimum and maximum prices for a given array of product data, with an optional filter for a specific category.
-export function getPriceRange(
-  productsData: ArrayData,
-  currenciesMap: CurrenciesMap,
-  selectedCurrency: string,
-  cathegory?: string
-): PriceRange {
-  let dataCopy = JSON.parse(JSON.stringify(productsData));
-  const result = dataCopy.reduce(
-    (accumulator: PriceRange, currVal: FetchedProductData) => {
-      const rating = getCurrencyRate(currVal.data.currency, selectedCurrency, currenciesMap) || 1;
-      if (cathegory && currVal.data.cathegory !== cathegory) return accumulator;
-      if (currVal.data.discount && currVal.data.discount_price) {
-        const price = currVal.data.discount_price * rating;
-        return minMax(accumulator.minPrice, accumulator.maxPrice, price);
-      } else if (currVal.data.price) {
-        const price = currVal.data.price * rating;
-        return minMax(accumulator.minPrice, accumulator.maxPrice, price);
-      } else {
-        if (accumulator.minPrice === null) accumulator.minPrice = 0;
-        return accumulator;
-      }
-    },
-    { maxPrice: 0, minPrice: null }
-  );
-  if (result.minPrice === null) {
-    return { maxPrice: result.maxPrice, minPrice: result.maxPrice };
-  }
-  return result;
-
-  function minMax(min: number | null, max: number, contender: number) {
-    let minPrice = 0;
-    if (min === null) {
-      minPrice = contender;
-    } else {
-      minPrice = min > contender ? contender : min;
-    }
-    const maxPrice = max < contender ? contender : max;
-    return { minPrice: formatPrice(minPrice, false), maxPrice: formatPrice(maxPrice, true) };
-  }
-}
 
 export default StoreLayout;

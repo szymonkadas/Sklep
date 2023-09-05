@@ -1,4 +1,4 @@
-export default function userUpdatingQuantity(
+export default function scButtonsInteractivity(
   ref: React.MutableRefObject<false | NodeJS.Timeout>,
   submitButtonsAvailability: boolean,
   setSubmitButtonsAvailability: (value: React.SetStateAction<boolean>) => void

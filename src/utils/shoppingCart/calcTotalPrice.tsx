@@ -1,5 +1,5 @@
 import { CurrencyRatios } from "../../api";
-import { TotalPriceInCurrencies } from "../../pages/ShoppingCart";
+import { TotalPriceInCurrencies } from "../../pages/ShoppingCartPage";
 import { Currency, CurrencyUpperCase, formatPrice } from "../currencyUtils";
 
 export default function calcTotalPrice(

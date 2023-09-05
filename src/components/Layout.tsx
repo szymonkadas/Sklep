@@ -1,14 +1,14 @@
-import { useMemo } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { Outlet, useLoaderData } from "react-router-dom";
 import { CollectionData, getCathegoriesData } from "../api";
 import { createLoaderFunction } from "../utils/createLoaderFunction";
 import Footer from "./Footer";
 import Header from "./Header";
 
-type headerData = {
+type LayoutLoaderData = {
   cathegories: CollectionData;
 };
-export type cathegoryData = {
+export type CathegoryData = {
   data: {
     cathegory: string;
     description: string;
@@ -17,23 +17,41 @@ export type cathegoryData = {
   };
   id: string;
 };
-export const headerLoader = await createLoaderFunction(
+export interface LayoutOutletContext extends ShoppingCartState {
+  cathegoriesData: CathegoryData[];
+}
+export type ShoppingCartState = {
+  shoppingCartData: string;
+  setShoppingCartData: Dispatch<SetStateAction<string>>;
+};
+export const layoutLoader = await createLoaderFunction(
   [{ key: "cathegories", fetcher: getCathegoriesData }],
   "headerData"
 );
+
 export default function Layout() {
-  const headerData = useLoaderData() as headerData;
+  const loaderData = useLoaderData() as LayoutLoaderData;
   const cathegoriesNames = useMemo(() => {
-    return headerData.cathegories.collectionData.map((cathegory: cathegoryData) => {
+    return loaderData.cathegories.collectionData.map((cathegory: CathegoryData) => {
       return cathegory.data.cathegory;
     });
-  }, [headerData]);
+  }, [loaderData]);
+  const [shoppingCartData, setShoppingCartData] = useState(localStorage.getItem("shoppingCart") || "[]");
+  useEffect(() => {
+    localStorage.setItem("shoppingCart", shoppingCartData);
+  }, [shoppingCartData]);
 
   return (
     <div className="site-wrapper">
-      <Header cathegories={cathegoriesNames} />
+      <Header
+        shoppingCartData={shoppingCartData}
+        setShoppingCartData={setShoppingCartData}
+        cathegories={cathegoriesNames}
+      />
       <main>
-        <Outlet context={headerData.cathegories.collectionData} />
+        <Outlet
+          context={{ cathegoriesData: loaderData.cathegories.collectionData, shoppingCartData, setShoppingCartData }}
+        />
       </main>
       <Footer />
     </div>

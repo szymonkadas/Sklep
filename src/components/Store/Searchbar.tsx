@@ -1,11 +1,12 @@
 import { ChangeEvent, FC, useContext, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { StoreData, allCathegoriesSelectorName, filterProducts } from "../../pages/store/StoreLayout";
+import { StoreData, allCathegoriesSelectorName } from "../../pages/store/StoreLayout";
 import { CurrenciesMap } from "../../utils/currencyUtils";
 import getRouteParam from "../../utils/getRouteParams";
 import getSearchParams from "../../utils/getSearchParams";
 import { changeSearchParams } from "../../utils/store/changeSearchParams";
 import createProductNames from "../../utils/store/createProductNames";
+import filterProducts from "../../utils/store/filterProducts";
 import { PriceRange } from "./PriceSetter";
 
 type SearchbarProps = {

@@ -296,7 +296,7 @@ export async function getCurrencyData(){
     base_currency: "PLN",
     currencies: "EUR,USD,PLN,GBP"
   }).then(response => {
-    return response
+    return response.ok ? response : false;
   })
   if(await result){
     return await result

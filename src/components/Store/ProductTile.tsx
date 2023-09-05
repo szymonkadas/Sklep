@@ -11,6 +11,7 @@ import ProductRating from "./ProductRating";
 interface ProductProps extends ProductData {
   classNamePrefix: string;
   id: string;
+  setShoppingCartData: React.Dispatch<React.SetStateAction<string>>;
 }
 const ProductTile: FC<ProductProps> = (props) => {
   const { currentCathegory } = getRouteParams(useParams(), ["current_cathegory"], [allCathegoriesSelectorName]);
@@ -49,19 +50,22 @@ const ProductTile: FC<ProductProps> = (props) => {
       </div>
       <button
         className={`${props.classNamePrefix}__product__add-product-button`}
-        onClick={() =>
-          addProductToSC({
-            cathegory: props.cathegory,
-            count: props.count,
-            currency: props.currency,
-            discount: props.discount,
-            discount_price: props.discount_price,
-            id: props.id,
-            name: props.name,
-            photo: props.photo,
-            price: props.price,
-          })
-        }
+        onClick={() => {
+          props.setShoppingCartData((prev) => {
+            const val = addProductToSC(prev, {
+              cathegory: props.cathegory,
+              count: props.count,
+              currency: props.currency,
+              discount: props.discount,
+              discount_price: props.discount_price,
+              id: props.id,
+              name: props.name,
+              photo: props.photo,
+              price: props.price,
+            });
+            return val;
+          });
+        }}
       >
         Dodaj do koszyka
       </button>

@@ -4,7 +4,12 @@ import { useSearchParams } from "react-router-dom";
 import { ProductData } from "../../api";
 import ProductTile from "../../components/Store/ProductTile";
 import getRouteParams from "../../utils/getRouteParams";
-import { ArrayData, FetchedProductData } from "./StoreLayout";
+import { FetchedProductData, StoreLayoutContext } from "./StoreLayout";
+
+export type StoreContext = {
+  filteredProductsMap: Map<string, ProductData>;
+  productsMap: Map<string, ProductData>;
+};
 
 const Store: FC<PropsWithChildren> = () => {
   const { currentCathegory } = getRouteParams(useParams(), ["current_cathegory"], [""]);
@@ -16,10 +21,7 @@ const Store: FC<PropsWithChildren> = () => {
   }, []);
   const { productId } = getRouteParams(useParams(), ["product_id"], [""]);
   const [products, setProducts] = useState([<></>]);
-  const { filteredProducts, productsMap } = useOutletContext() as {
-    filteredProducts: ArrayData;
-    productsMap: Map<string, ProductData>;
-  };
+  const { filteredProducts, productsMap, setShoppingCartData } = useOutletContext() as StoreLayoutContext;
   const filteredProductsMap = useMemo(() => {
     const productsMap = new Map<string, ProductData>();
     filteredProducts.forEach((product: FetchedProductData) => {
@@ -35,13 +37,16 @@ const Store: FC<PropsWithChildren> = () => {
           classNamePrefix="store"
           {...product.data}
           id={product.id}
+          setShoppingCartData={setShoppingCartData}
         ></ProductTile>
       );
     });
     setProducts(data);
   }, [filteredProducts]);
+
+  // render either product page or product tiles list
   const content = productId ? (
-    <Outlet context={{ productsMap, filteredProductsMap }}></Outlet>
+    <Outlet context={{ filteredProductsMap, productsMap, setShoppingCartData }}></Outlet>
   ) : (
     <section className="store">{...products}</section>
   );

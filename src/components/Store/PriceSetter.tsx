@@ -1,10 +1,12 @@
 import { ChangeEvent, FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { StoreData, allCathegoriesSelectorName, filterProducts, getPriceRange } from "../../pages/store/StoreLayout";
+import { StoreData, allCathegoriesSelectorName } from "../../pages/store/StoreLayout";
 import { CurrenciesMap } from "../../utils/currencyUtils";
 import getRouteParams from "../../utils/getRouteParams";
 import getSearchParams from "../../utils/getSearchParams";
 import { changeSearchParams } from "../../utils/store/changeSearchParams";
+import filterProducts from "../../utils/store/filterProducts";
+import getPriceRange from "../../utils/store/getPriceRange";
 
 export type PriceRange = {
   maxPrice: number;
@@ -48,6 +50,11 @@ const PriceSetter: FC<PriceSetterProps> = (props: PriceSetterProps) => {
   const pricePattern = /^\d{0,5}([.,]\d+)?$/; //only values in range <0; maxInputPrice> and "";
   const incorrectPriceRangeClass = priceRangeValidity ? "" : "store-aside__price-filter__input--incorrect";
 
+  function savePriceRangeChanges(value: string, setter: React.Dispatch<React.SetStateAction<string>>) {
+    setter(value);
+    setTimeout(submitUsersPriceRange, 250);
+  }
+
   const submitUsersPriceRange = () => {
     checkPriceRangeValidity(min, max);
     if (priceRangeValidity) {
@@ -70,6 +77,7 @@ const PriceSetter: FC<PriceSetterProps> = (props: PriceSetterProps) => {
     }
     return;
   };
+
   const checkPriceRangeValidity = useCallback((min: string, max: string) => {
     if (!pricePattern.test(max) || !pricePattern.test(min)) {
       setPriceRangeValidity(false);
@@ -134,7 +142,7 @@ const PriceSetter: FC<PriceSetterProps> = (props: PriceSetterProps) => {
   };
   useEffect(() => window.addEventListener("slider-price-change", handleSliderChange), []);
 
-  // updating changes on currency change (it automatically changes usersPrice range )
+  // updating changes on currency change (such change automatically changes usersPrice range) + other activities that may change usersMaxPrice/minPrice.
   useEffect(() => {
     setMax(usersMaxPrice);
     setMin(usersMinPrice);
@@ -191,6 +199,7 @@ const PriceSetter: FC<PriceSetterProps> = (props: PriceSetterProps) => {
           event-name-to-emit-on-change="slider-price-change"
           hide-label
           hide-legend
+          // inputs-for-labels
         />
       </div>
     </div>

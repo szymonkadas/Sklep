@@ -3,16 +3,20 @@ import { NavLink } from "react-router-dom";
 import { ShoppingCartData } from "../../utils/shoppingCart/addProductToSC";
 import Price from "../Store/ProductComponents/Price";
 
-type ProductListingProps = {
+type SCProductListingProps = {
   id: string;
   classNamePrefix: string;
   data: ShoppingCartData;
   updateListedProductsData: (id: string, quantity: number) => void;
+  setShoppingCartData: React.Dispatch<React.SetStateAction<string>>;
   onQuantityChange?: () => void;
 };
 
-function ProductListing(props: ProductListingProps) {
+function SCProductListing(props: SCProductListingProps) {
   const [quantity, setQuantity] = useState(props.data.quantity);
+  useEffect(() => {
+    quantity !== props.data.quantity && setQuantity(props.data.quantity);
+  }, [props.data.quantity]);
   let quantityTimeoutRef: React.MutableRefObject<NodeJS.Timeout | false> = useRef(false);
 
   useEffect(() => {
@@ -27,15 +31,22 @@ function ProductListing(props: ProductListingProps) {
     }
   }, [quantity]);
   return (
-    <li id={props.id} className={`${props.classNamePrefix}__product-item`}>
+    <li
+      id={props.id}
+      className={`${props.classNamePrefix}__product-item`}
+      key={`${props.data.productData.id}__${props.data}`}
+    >
       <NavLink to={`/store/all/${props.data.productData.id}`}>
         <img
           className={`${props.classNamePrefix}__product-item__img`}
           src={`/src/assets${props.data.productData.photo}`}
+          height="100px"
         ></img>
       </NavLink>
       <NavLink to={`/store/all/${props.data.productData.id}`}>
-        <h5 className={`${props.classNamePrefix}__product-item__name`}>{props.data.productData.name}</h5>
+        <h5 className={`${props.classNamePrefix}__product-item__name`}>
+          {props.data.productData.name} x {props.data.quantity}
+        </h5>
       </NavLink>
       {props.onQuantityChange && (
         <>
@@ -99,4 +110,4 @@ function ProductListing(props: ProductListingProps) {
   }
 }
 
-export default ProductListing;
+export default SCProductListing;

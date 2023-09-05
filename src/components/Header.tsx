@@ -1,26 +1,38 @@
-import { useEffect, useMemo, useState } from "react";
+import { SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { CurrencyRatios, getCurrencyData } from "../api";
-import { TotalPriceInCurrencies } from "../pages/ShoppingCart";
+import ShoppingCartMock from "../pages/ShoppingCartMock";
+import { sbaContext } from "../pages/ShoppingCartPage";
 import { allCathegoriesSelectorName, defaultCurrency } from "../pages/store/StoreLayout";
 import "../style/components/css/Header.css";
-import { CurrencyUpperCase, currencySigns } from "../utils/currencyUtils";
+import { currencySigns } from "../utils/currencyUtils";
 import getSearchParams from "../utils/getSearchParams";
-import calcTotalPrice from "../utils/shoppingCart/calcTotalPrice";
 import { changeSearchParams } from "../utils/store/changeSearchParams";
-import ProductList from "./ShoppingCart/ProductsList";
 
 type HeaderProps = {
   cathegories: string[];
+  shoppingCartData: string;
+  setShoppingCartData: React.Dispatch<SetStateAction<string>>;
 };
 export default function Header(props: HeaderProps) {
   // couldn't use hooks inside inner functions so i'm using native js approach.
   const searchParams = new URLSearchParams(document.location.search);
   const redirect = useNavigate();
+
   // setting up localStorage currency if not present
+  const [currencyData, setCurrencyData] = useState({ meta: { last_updated_at: "" } } as CurrencyRatios);
   useEffect(() => {
     if (!localStorage.getItem("selectedCurrency")) {
       localStorage.setItem("selectedCurrency", defaultCurrency);
+    }
+    const currencyData = localStorage.getItem("currencyData");
+    if (currencyData) {
+      setCurrencyData(JSON.parse(currencyData));
+    } else {
+      getCurrencyData().then((data) => {
+        localStorage.setItem("currencyData", JSON.stringify(data));
+        setCurrencyData(data);
+      });
     }
   }, []);
   const [selectedCurrency, setSelectedCurrency] = useState("");
@@ -31,36 +43,9 @@ export default function Header(props: HeaderProps) {
         defaultCurrency
     );
   }, [localStorage.getItem("selectedCurrency"), getSearchParams(searchParams, ["selected_currency"]).selectedCurrency]);
-  const [totalPriceInCurrencies, setTotalPriceInCurrencies] = useState({
-    usd: 0,
-    eur: 0,
-    pln: 0,
-    gbp: 0,
-  } as TotalPriceInCurrencies);
 
-  const [productsData, setProductsData] = useState(JSON.parse(localStorage.getItem("shoppingCart") || ""));
-  useEffect(() => {
-    setProductsData(JSON.parse(localStorage.getItem("shoppingCart") || ""));
-  }, [localStorage.getItem("shoppingCart")]);
-
-  const [currencyData, setCurrencyData] = useState({ meta: { last_updated_at: "" } } as CurrencyRatios);
-  useEffect(() => {
-    const currencyData = localStorage.getItem("currencyData");
-    if (currencyData) {
-      setCurrencyData(JSON.parse(currencyData));
-    } else {
-      getCurrencyData().then((data) => {
-        localStorage.setItem("currencyData", data);
-      });
-    }
-  }, [localStorage.getItem("currencyData")]);
-
-  const totalPrice = useMemo(() => {
-    const baseRate = Object.hasOwn(currencyData, "data")
-      ? currencyData.data[selectedCurrency.toUpperCase() as CurrencyUpperCase].value
-      : 1;
-    return Object.hasOwn(currencyData, "data") ? calcTotalPrice(totalPriceInCurrencies, baseRate, currencyData) : 0;
-  }, [totalPriceInCurrencies, selectedCurrency]);
+  const [submitButtonAvailability, setSubmitButtonAvailability] = useState(true);
+  const sbaTimeoutRef: React.MutableRefObject<NodeJS.Timeout | false> = useRef(false);
 
   // creating elements
   const storeNavLinks = props.cathegories.map((cathegory) => {
@@ -95,6 +80,7 @@ export default function Header(props: HeaderProps) {
       }),
     []
   );
+
   return (
     <header className="header">
       <div className="header__logo">Logo</div>
@@ -151,24 +137,35 @@ export default function Header(props: HeaderProps) {
               to="/shopping_cart"
               className={({ isActive, isPending }) => (isPending ? "pending" : isActive ? "active" : "")}
             >
-              {totalPrice}
+              {/* {totalPrice} */}
               <span className="currency"> {currencySigns.get(selectedCurrency)}</span>
             </NavLink>
             {/* Zrób obramowanie, i before'a tak żeby wyglądało to na ikonkę koszyka */}
             <div className="nav-links__li__sub-cathegories-wrapper">
               <div className="nav-links__li__sub-cathegories">
                 {/* Zrób by był slider, gridem do ogarnięcia ig i max-heightem*/}
-                {productsData && currencyData.meta.last_updated_at && (
-                  <ProductList
-                    classNamePrefix="nav-links__li__sub-cathegories__products"
-                    totalPriceInCurrencies={totalPriceInCurrencies}
-                    setTotalPriceInCurrencies={setTotalPriceInCurrencies}
-                    productsData={productsData}
-                    currencyData={currencyData}
-                  ></ProductList>
+                {currencyData?.meta.last_updated_at ? (
+                  <sbaContext.Provider value={{ sbaTimeoutRef, submitButtonAvailability, setSubmitButtonAvailability }}>
+                    <ShoppingCartMock
+                      shoppingCartData={props.shoppingCartData}
+                      setShoppingCartData={props.setShoppingCartData}
+                      currencyData={currencyData}
+                    >
+                      <>
+                        <button className="shopping-cart__button--checkout" disabled={!submitButtonAvailability}>
+                          dostawa i płatność
+                        </button>
+                        {/* <a className="shopping-cart__button--continue" onClick={() => history.back()}>
+                          Kontynuuj Zakupy
+                        </a>{" "} */}
+                      </>
+                    </ShoppingCartMock>
+                  </sbaContext.Provider>
+                ) : (
+                  "Pusty koszyk"
                 )}
                 <div className="nav-links__li__sub-cathegories__sum">
-                  <b>Kwota:</b> {totalPrice} <span className="currency">{currencySigns.get(selectedCurrency)}</span>
+                  {/* <b>Kwota:</b> {totalPrice} <span className="currency">{currencySigns.get(selectedCurrency)}</span> */}
                 </div>
                 <NavLink to="/shopping_cart">
                   <button>Zobacz Koszyk</button>

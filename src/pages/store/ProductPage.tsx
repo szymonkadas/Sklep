@@ -1,7 +1,6 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useOutletContext, useParams } from "react-router";
 import { NavLink, useSearchParams } from "react-router-dom";
-import { ProductData } from "../../api";
 import Price from "../../components/Store/ProductComponents/Price";
 import ProductImage from "../../components/Store/ProductComponents/ProductImage";
 import ProposalsOfProductTiles from "../../components/Store/ProductComponents/ProposalsOfProductTiles";
@@ -10,7 +9,9 @@ import ProductRating, { getRatingData } from "../../components/Store/ProductRati
 import { currencySigns } from "../../utils/currencyUtils";
 import getRouteParams from "../../utils/getRouteParams";
 import addProductToSC from "../../utils/shoppingCart/addProductToSC";
+import { StoreContext } from "./Store";
 import { ArrayData, allCathegoriesSelectorName } from "./StoreLayout";
+
 const ProductPage: FC = () => {
   const classNamePrefix = "store__product-page";
   const [size, setSize] = useState("");
@@ -19,10 +20,7 @@ const ProductPage: FC = () => {
     rating: 0,
     description: "This product doesn't have any opinions so far.",
   });
-  const { productsMap, filteredProductsMap } = useOutletContext() as {
-    productsMap: Map<string, ProductData>;
-    filteredProductsMap: Map<string, ProductData>;
-  };
+  const { productsMap, filteredProductsMap, setShoppingCartData } = useOutletContext() as StoreContext;
   const { currentCathegory, productId } = getRouteParams(
     useParams(),
     ["current_cathegory", "product_id"],
@@ -161,16 +159,18 @@ const ProductPage: FC = () => {
                 <button
                   className={`${classNamePrefix}__data__submit__button`}
                   onClick={() =>
-                    addProductToSC({
-                      cathegory: product.cathegory,
-                      count: product.count,
-                      currency: product.currency,
-                      discount: product.discount,
-                      discount_price: product.discount_price,
-                      id: productId,
-                      name: product.name,
-                      photo: product.photo,
-                      price: product.price,
+                    setShoppingCartData((prev) => {
+                      return addProductToSC(prev, {
+                        cathegory: product.cathegory,
+                        count: product.count,
+                        currency: product.currency,
+                        discount: product.discount,
+                        discount_price: product.discount_price,
+                        id: productId,
+                        name: product.name,
+                        photo: product.photo,
+                        price: product.price,
+                      });
                     })
                   }
                 >

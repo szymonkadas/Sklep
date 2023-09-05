@@ -1,8 +1,10 @@
 import { ShoppingCartData } from "./addProductToSC";
-export default function changeSCProductQuantity(productId: string, desiredQuantity: number) {
-  const cartData = localStorage.getItem("shoppingCart");
+
+// it works on saved data in localStorage, not on actual stated data
+export default function changeSCProductQuantity(currentData: string, productId: string, desiredQuantity: number) {
+  const cartData = JSON.parse(currentData);
   if (cartData) {
-    const mappedData = new Map<string, ShoppingCartData>(JSON.parse(cartData));
+    const mappedData = new Map<string, ShoppingCartData>(cartData);
     const desiredRecord = mappedData.get(productId);
     if (desiredRecord) {
       const quantity =
@@ -12,11 +14,13 @@ export default function changeSCProductQuantity(productId: string, desiredQuanti
       } else {
         mappedData.delete(productId);
       }
-      localStorage.setItem("shoppingCart", JSON.stringify(Array.from(mappedData)));
+      const result = JSON.stringify(Array.from(mappedData));
+      localStorage.setItem("shoppingCart", result);
+      return result;
     } else {
       console.error("there is no such item");
     }
   } else {
-    console.error("there aren't any products in the shopping cart!");
+    console.error("Shopping cart doesn't exist!");
   }
 }

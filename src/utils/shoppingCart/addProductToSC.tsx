@@ -1,9 +1,10 @@
 import { Currency } from "../currencyUtils";
-
-export default function addProductToSC(productData: ShoppingCartProductData) {
-  const cartData = localStorage.getItem("shoppingCart");
-  if (cartData) {
-    const prevData = new Map<string, ShoppingCartData>(JSON.parse(cartData));
+// It works on saved data in local storage, not state of app.
+// function takes current shopping cart data, and adds to it desired product, then returns data with added product.
+export default function addProductToSC(currentData: string, productData: ShoppingCartProductData) {
+  const cartData = JSON.parse(currentData);
+  if (cartData.length > 0) {
+    const prevData = new Map<string, ShoppingCartData>(cartData);
     const currentRecord: ShoppingCartData = prevData.get(productData.id) || {
       productData,
       quantity: 0,
@@ -12,12 +13,14 @@ export default function addProductToSC(productData: ShoppingCartProductData) {
       currentRecord.quantity = productData.count - 1;
     }
     prevData.set(productData.id, { productData: currentRecord.productData, quantity: currentRecord.quantity + 1 });
-    localStorage.setItem("shoppingCart", JSON.stringify(Array.from(prevData)));
+    const result = JSON.stringify(Array.from(prevData));
+    localStorage.setItem("shoppingCart", result);
+    return result;
   } else {
-    localStorage.setItem(
-      "shoppingCart",
-      JSON.stringify(Array.from(new Map([[productData.id, { productData, quantity: 1 }]])))
-    );
+    cartData.push([productData.id, { productData, quantity: 1 }]);
+    const result = JSON.stringify(Array.from(cartData));
+    localStorage.setItem("shoppingCart", result);
+    return result;
   }
 }
 export type ShoppingCartRecord = [string, ShoppingCartData];
